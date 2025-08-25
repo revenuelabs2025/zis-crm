@@ -535,17 +535,17 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
         // ============================================
         // KONFIGURACJA
         // ============================================
         
-        // Tutaj normalnie byłaby konfiguracja Supabase
-        // Dla demo używamy mock API
-        const API_CONFIG = {
-            loginEndpoint: '/api/login', // Zmień na swój endpoint
-            dashboardUrl: '/dashboard'   // URL do przekierowania po zalogowaniu
-        };
+        // Konfiguracja Supabase
+        const SUPABASE_URL = 'https://your-project.supabase.co';
+        const SUPABASE_ANON_KEY = 'YOUR_PUBLIC_ANON_KEY';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const DASHBOARD_URL = '/dashboard';
 
         // ============================================
         // STAN APLIKACJI
@@ -659,59 +659,26 @@
         }
 
         // ============================================
-        // SYMULACJA LOGOWANIA (MOCK)
+        // LOGOWANIE Z WYKORZYSTANIEM SUPABASE
         // ============================================
-        async function mockLogin(email, password) {
-            // Symulacja opóźnienia sieciowego
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            // Przykładowe dane testowe
-            const validUsers = [
-                { email: 'admin@firma.pl', password: 'admin123' },
-                { email: 'jan.kowalski@firma.pl', password: 'haslo123' },
-                { email: 'test@test.pl', password: 'test123' }
-            ];
-            
-            const user = validUsers.find(u => u.email === email && u.password === password);
-            
-            if (user) {
-                return {
-                    success: true,
-                    data: {
-                        id: Math.random().toString(36).substr(2, 9),
-                        email: user.email,
-                        name: user.email.split('@')[0],
-                        token: 'mock-jwt-token-' + Math.random().toString(36).substr(2)
-                    }
-                };
-            } else {
-                return {
-                    success: false,
-                    error: 'Nieprawidłowy email lub hasło'
-                };
-            }
-        }
-
-        // ============================================
-        // RZECZYWISTE LOGOWANIE (UŻYWAJ Z PRAWDZIWYM API)
-        // ============================================
-        async function realLogin(email, password) {
+        async function supabaseLogin(email, password) {
             try {
-                const response = await fetch(API_CONFIG.loginEndpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password })
+                const { data: { user, session }, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
                 });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    return { success: true, data };
-                } else {
-                    return { success: false, error: data.message || 'Błąd logowania' };
+                if (error) {
+                    return { success: false, error: error.message };
                 }
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('id, name')
+                    .eq('id', user.id)
+                    .single();
+                if (profileError) {
+                    return { success: false, error: profileError.message };
+                }
+                return { success: true, data: { user, session, profile } };
             } catch (error) {
                 console.error('Błąd połączenia:', error);
                 return { success: false, error: 'Błąd połączenia z serwerem' };
@@ -721,22 +688,18 @@
         // ============================================
         // OBSŁUGA SUKCESU LOGOWANIA
         // ============================================
-        function handleLoginSuccess(userData) {
-            // Zapisz token w localStorage lub sessionStorage
-            if (userData.token) {
-                localStorage.setItem('authToken', userData.token);
-                localStorage.setItem('userData', JSON.stringify(userData));
+        function handleLoginSuccess({ user, session, profile }) {
+            if (session?.access_token) {
+                localStorage.setItem('authToken', session.access_token);
             }
-            
-            // Pokaż komunikat sukcesu
+            localStorage.setItem('userData', JSON.stringify({ user, profile }));
+
             elements.loginForm.style.display = 'none';
+            elements.successMessage.querySelector('h2').textContent = `Witaj ${profile?.name || user.email}!`;
             elements.successMessage.classList.add('show');
-            
-            // Przekieruj po 2 sekundach
+
             setTimeout(() => {
-                // window.location.href = API_CONFIG.dashboardUrl;
-                console.log('Przekierowanie do dashboardu...', userData);
-                alert('Zalogowano pomyślnie! W prawdziwej aplikacji nastąpiłoby przekierowanie.');
+                window.location.href = DASHBOARD_URL;
             }, 2000);
         }
 
@@ -766,9 +729,7 @@
             setLoadingState(true);
             
             try {
-                // Użyj mockLogin dla demo lub realLogin dla prawdziwego API
-                const result = await mockLogin(state.formData.email, state.formData.password);
-                // const result = await realLogin(state.formData.email, state.formData.password);
+                const result = await supabaseLogin(state.formData.email, state.formData.password);
                 
                 if (result.success) {
                     handleLoginSuccess(result.data);
@@ -810,26 +771,17 @@
         // ============================================
         
         // Sprawdź czy użytkownik jest już zalogowany
-        function checkAuthStatus() {
-            const token = localStorage.getItem('authToken');
-            if (token) {
-                // Opcjonalnie: zweryfikuj token z backendem
+        async function checkAuthStatus() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
                 console.log('Użytkownik już zalogowany');
-                // window.location.href = API_CONFIG.dashboardUrl;
+                window.location.href = DASHBOARD_URL;
             }
         }
 
         // Uruchom sprawdzenie przy załadowaniu strony
         document.addEventListener('DOMContentLoaded', checkAuthStatus);
-
-        // ============================================
-        // INFORMACJA DLA DEVELOPERA
-        // ============================================
         console.log('%c🔐 CRM Login System', 'color: #e58414; font-size: 20px; font-weight: bold;');
-        console.log('%cDane testowe do logowania:', 'color: #059669; font-weight: bold;');
-        console.log('Email: admin@firma.pl | Hasło: admin123');
-        console.log('Email: jan.kowalski@firma.pl | Hasło: haslo123');
-        console.log('Email: test@test.pl | Hasło: test123');
     </script>
 </body>
 </html>

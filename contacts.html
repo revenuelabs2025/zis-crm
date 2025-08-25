@@ -317,36 +317,11 @@
             color: #2c3e50;
         }
 
-        /* Contact name with avatar */
+        /* Contact name */
         .contact-name-cell {
             display: flex;
             align-items: center;
-            gap: 12px;
         }
-
-        .contact-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-
-        .avatar-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .avatar-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .avatar-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .avatar-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        .avatar-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-        .avatar-6 { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
-        .avatar-7 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
-        .avatar-8 { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
-        .avatar-9 { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
-        .avatar-10 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
 
         .contact-info {
             display: flex;
@@ -693,8 +668,7 @@
                 phone: "+48 601 234 567",
                 owner: "Jan Kowalski",
                 lastActivity: "2024-01-15",
-                type: "klient",
-                avatarClass: "avatar-1"
+                type: "klient"
             },
             {
                 id: 2,
@@ -707,8 +681,7 @@
                 phone: "+48 602 345 678",
                 owner: "Anna Nowak",
                 lastActivity: "2024-01-14",
-                type: "lead",
-                avatarClass: "avatar-2"
+                type: "lead"
             },
             {
                 id: 3,
@@ -721,8 +694,7 @@
                 phone: "+48 603 456 789",
                 owner: "Jan Kowalski",
                 lastActivity: "2024-01-13",
-                type: "partner",
-                avatarClass: "avatar-3"
+                type: "partner"
             },
             {
                 id: 4,
@@ -735,8 +707,7 @@
                 phone: "+48 604 567 890",
                 owner: "Piotr Wiśniewski",
                 lastActivity: "2024-01-12",
-                type: "klient",
-                avatarClass: "avatar-4"
+                type: "klient"
             },
             {
                 id: 5,
@@ -749,8 +720,7 @@
                 phone: "+48 605 678 901",
                 owner: "Anna Nowak",
                 lastActivity: "2024-01-11",
-                type: "dostawca",
-                avatarClass: "avatar-5"
+                type: "dostawca"
             },
             {
                 id: 6,
@@ -763,8 +733,7 @@
                 phone: "+48 606 789 012",
                 owner: "Jan Kowalski",
                 lastActivity: "2024-01-10",
-                type: "klient",
-                avatarClass: "avatar-6"
+                type: "klient"
             },
             {
                 id: 7,
@@ -777,8 +746,7 @@
                 phone: "+48 607 890 123",
                 owner: "Piotr Wiśniewski",
                 lastActivity: "2024-01-09",
-                type: "partner",
-                avatarClass: "avatar-7"
+                type: "partner"
             },
             {
                 id: 8,
@@ -791,8 +759,7 @@
                 phone: "+48 608 901 234",
                 owner: "Anna Nowak",
                 lastActivity: "2024-01-08",
-                type: "dostawca",
-                avatarClass: "avatar-8"
+                type: "dostawca"
             },
             {
                 id: 9,
@@ -805,8 +772,7 @@
                 phone: "+48 609 012 345",
                 owner: "Jan Kowalski",
                 lastActivity: "2024-01-07",
-                type: "lead",
-                avatarClass: "avatar-9"
+                type: "lead"
             },
             {
                 id: 10,
@@ -819,8 +785,7 @@
                 phone: "+48 610 123 456",
                 owner: "Piotr Wiśniewski",
                 lastActivity: "2024-01-06",
-                type: "klient",
-                avatarClass: "avatar-10"
+                type: "klient"
             }
         ];
 
@@ -845,9 +810,6 @@
                 <tr onclick="openContactDetails(${contact.id})">
                     <td>
                         <div class="contact-name-cell">
-                            <div class="contact-avatar ${contact.avatarClass}">
-                                ${contact.name.split(' ').map(n => n[0]).join('')}
-                            </div>
                             <div class="contact-info">
                                 <div class="contact-name">${contact.name}</div>
                                 <div class="contact-title">${contact.title}</div>

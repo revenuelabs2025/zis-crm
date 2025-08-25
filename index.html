@@ -543,7 +543,7 @@
         // Tutaj normalnie byłaby konfiguracja Supabase
         // Dla demo używamy mock API
         const API_CONFIG = {
-            loginEndpoint: '/api/login', // Zmień na swój endpoint
+            loginEndpoint: 'https://api.firma.pl/login', // Właściwy adres serwera
             dashboardUrl: '/dashboard'   // URL do przekierowania po zalogowaniu
         };
 
@@ -664,32 +664,9 @@
         async function mockLogin(email, password) {
             // Symulacja opóźnienia sieciowego
             await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            // Przykładowe dane testowe
-            const validUsers = [
-                { email: 'admin@firma.pl', password: 'admin123' },
-                { email: 'jan.kowalski@firma.pl', password: 'haslo123' },
-                { email: 'test@test.pl', password: 'test123' }
-            ];
-            
-            const user = validUsers.find(u => u.email === email && u.password === password);
-            
-            if (user) {
-                return {
-                    success: true,
-                    data: {
-                        id: Math.random().toString(36).substr(2, 9),
-                        email: user.email,
-                        name: user.email.split('@')[0],
-                        token: 'mock-jwt-token-' + Math.random().toString(36).substr(2)
-                    }
-                };
-            } else {
-                return {
-                    success: false,
-                    error: 'Nieprawidłowy email lub hasło'
-                };
-            }
+
+            // Przekierowanie do prawdziwego logowania
+            return realLogin(email, password);
         }
 
         // ============================================
@@ -766,9 +743,9 @@
             setLoadingState(true);
             
             try {
-                // Użyj mockLogin dla demo lub realLogin dla prawdziwego API
-                const result = await mockLogin(state.formData.email, state.formData.password);
-                // const result = await realLogin(state.formData.email, state.formData.password);
+                // Użyj realLogin dla prawdziwego API
+                // const result = await mockLogin(state.formData.email, state.formData.password);
+                const result = await realLogin(state.formData.email, state.formData.password);
                 
                 if (result.success) {
                     handleLoginSuccess(result.data);

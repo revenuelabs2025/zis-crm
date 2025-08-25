@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRM System - Logowanie</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <style>
         /* Reset i podstawowe style */
         * {
@@ -540,10 +541,12 @@
         // KONFIGURACJA
         // ============================================
         
-        // Tutaj normalnie byłaby konfiguracja Supabase
-        // Dla demo używamy mock API
+        // Konfiguracja Supabase
+        const SUPABASE_URL = 'https://your-project.supabase.co';
+        const SUPABASE_ANON_KEY = 'public-anon-key';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         const API_CONFIG = {
-            loginEndpoint: 'https://api.firma.pl/login', // Właściwy adres serwera
             dashboardUrl: '/dashboard'   // URL do przekierowania po zalogowaniu
         };
 
@@ -705,21 +708,16 @@
         // ============================================
         async function realLogin(email, password) {
             try {
-                const response = await fetch(API_CONFIG.loginEndpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password })
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
                 });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    return { success: true, data };
-                } else {
-                    return { success: false, error: data.message || 'Błąd logowania' };
+
+                if (error) {
+                    return { success: false, error: error.message };
                 }
+
+                return { success: true, data };
             } catch (error) {
                 console.error('Błąd połączenia:', error);
                 return { success: false, error: 'Błąd połączenia z serwerem' };
@@ -729,11 +727,11 @@
         // ============================================
         // OBSŁUGA SUKCESU LOGOWANIA
         // ============================================
-        function handleLoginSuccess(userData) {
-            // Zapisz token w localStorage lub sessionStorage
-            if (userData.token) {
-                localStorage.setItem('authToken', userData.token);
-                localStorage.setItem('userData', JSON.stringify(userData));
+        function handleLoginSuccess(authData) {
+            const { session, user } = authData;
+            if (session?.access_token) {
+                localStorage.setItem('authToken', session.access_token);
+                localStorage.setItem('userData', JSON.stringify(user));
             }
             
             // Pokaż komunikat sukcesu
@@ -816,10 +814,9 @@
         // ============================================
         
         // Sprawdź czy użytkownik jest już zalogowany
-        function checkAuthStatus() {
-            const token = localStorage.getItem('authToken');
-            if (token) {
-                // Opcjonalnie: zweryfikuj token z backendem
+        async function checkAuthStatus() {
+            const { data } = await supabaseClient.auth.getSession();
+            if (data.session) {
                 console.log('Użytkownik już zalogowany');
                 // window.location.href = API_CONFIG.dashboardUrl;
             }

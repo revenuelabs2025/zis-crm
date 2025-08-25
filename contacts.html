@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM System - Kontakty</title>
+    <style>
+        /* Reset i podstawowe style */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            color: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        .logo-container {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-img {
+            width: 100%;
+            max-width: 160px;
+            height: auto;
+        }
+
+        /* Navigation */
+        .nav-menu {
+            flex: 1;
+            padding: 20px 12px;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            color: #6b7280;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: #f3f4f6;
+            color: #2c3e50;
+        }
+
+        .nav-item.active {
+            background: #fef3e2;
+            color: #e58414;
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        /* User section */
+        .user-section {
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+            background: #fafbfc;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e58414 0%, #c46f0f 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(229, 132, 20, 0.3);
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .user-email {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 8px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: #fef2f2;
+            color: #ef4444;
+            border-color: #fecaca;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 24px 32px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+        }
+
+        /* Filters bar */
+        .filters-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 280px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: #fafbfc;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #e58414;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(229, 132, 20, 0.08);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: #9ca3af;
+        }
+
+        .filter-select {
+            padding: 10px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 160px;
+        }
+
+        .filter-select:hover {
+            border-color: #d1d5db;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #e58414;
+            box-shadow: 0 0 0 3px rgba(229, 132, 20, 0.08);
+        }
+
+        .add-contact-btn {
+            padding: 10px 20px;
+            background: #e58414;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .add-contact-btn:hover {
+            background: #d47812;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(229, 132, 20, 0.2);
+        }
+
+        /* Table container */
+        .table-container {
+            flex: 1;
+            background: white;
+            margin: 24px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Table */
+        .contacts-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .contacts-table thead {
+            background: #fafbfc;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .contacts-table th {
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .contacts-table tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .contacts-table tbody tr:hover {
+            background: #fafbfc;
+        }
+
+        .contacts-table td {
+            padding: 16px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        /* Contact name with avatar */
+        .contact-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .avatar-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .avatar-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .avatar-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .avatar-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .avatar-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .avatar-6 { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        .avatar-7 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .avatar-8 { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+        .avatar-9 { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+        .avatar-10 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+        }
+
+        .contact-title {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        /* Company */
+        .company-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        /* Address */
+        .address-text {
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Email and phone */
+        .contact-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .contact-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Owner badge */
+        .owner-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            background: #f3f4f6;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .owner-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        /* Activity date */
+        .activity-date {
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .activity-recent {
+            color: #10b981;
+            font-weight: 500;
+        }
+
+        /* Empty state */
+        .empty-state {
+            padding: 80px 40px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .empty-text {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px;
+            }
+
+            .table-container {
+                margin: 16px;
+                overflow-x: auto;
+            }
+
+            .filters-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+        }
+
+        /* Mobile menu button */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 8px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 101;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Overlay for mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile menu button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
+
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <img src="http://dachplaski24.pl/wp-content/uploads/2025/08/LOGO-ZIS-ZAWADZKI.jpg" alt="ZIS Zawadzki" class="logo-img">
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active" onclick="setActiveNav(this)">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <span>Kontakty</span>
+            </a>
+            <a href="#" class="nav-item" onclick="setActiveNav(this)">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                <span>CRM</span>
+            </a>
+            <a href="#" class="nav-item" onclick="setActiveNav(this)">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Realizacje</span>
+            </a>
+            <a href="#" class="nav-item" onclick="setActiveNav(this)">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+                <span>Baza wiedzy</span>
+            </a>
+            <a href="#" class="nav-item" onclick="setActiveNav(this)">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span>Narzędzia</span>
+            </a>
+        </nav>
+
+        <div class="user-section">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">JK</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Jan Kowalski</div>
+                    <div class="user-email" id="userEmail">jan.kowalski@firma.pl</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                <span>Wyloguj się</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="page-title">Kontakty</h1>
+
+            <div class="filters-bar">
+                <div class="search-box">
+                    <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Szukaj kontaktów..." id="searchInput" onkeyup="filterContacts()">
+                </div>
+
+                <select class="filter-select" id="filterRegion" onchange="filterContacts()">
+                    <option value="">Wszystkie województwa</option>
+                    <option value="mazowieckie">Mazowieckie</option>
+                    <option value="śląskie">Śląskie</option>
+                    <option value="wielkopolskie">Wielkopolskie</option>
+                    <option value="małopolskie">Małopolskie</option>
+                    <option value="dolnośląskie">Dolnośląskie</option>
+                    <option value="łódzkie">Łódzkie</option>
+                    <option value="pomorskie">Pomorskie</option>
+                    <option value="kujawsko-pomorskie">Kujawsko-Pomorskie</option>
+                    <option value="zachodniopomorskie">Zachodniopomorskie</option>
+                    <option value="lubelskie">Lubelskie</option>
+                </select>
+
+                <select class="filter-select" id="filterType" onchange="filterContacts()">
+                    <option value="">Wszystkie typy</option>
+                    <option value="klient">Klient</option>
+                    <option value="lead">Lead</option>
+                    <option value="partner">Partner</option>
+                    <option value="dostawca">Dostawca</option>
+                </select>
+
+                <select class="filter-select" id="filterOwner" onchange="filterContacts()">
+                    <option value="">Wszyscy właściciele</option>
+                    <option value="Jan Kowalski">Jan Kowalski</option>
+                    <option value="Anna Nowak">Anna Nowak</option>
+                    <option value="Piotr Wiśniewski">Piotr Wiśniewski</option>
+                </select>
+
+                <button class="add-contact-btn" onclick="openAddContactModal()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span>Dodaj kontakt</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Table Container -->
+        <div class="table-container">
+            <table class="contacts-table" id="contactsTable">
+                <thead>
+                    <tr>
+                        <th>Kontakt</th>
+                        <th>Firma</th>
+                        <th>Adres</th>
+                        <th>Email</th>
+                        <th>Telefon</th>
+                        <th>Właściciel</th>
+                        <th>Ostatnia aktywność</th>
+                    </tr>
+                </thead>
+                <tbody id="contactsTableBody">
+                    <!-- Kontakty będą wstawiane przez JavaScript -->
+                </tbody>
+            </table>
+
+            <!-- Empty state -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div class="empty-icon">
+                    <svg width="40" height="40" fill="none" stroke="#9ca3af" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                    </svg>
+                </div>
+                <h3 class="empty-title">Brak kontaktów</h3>
+                <p class="empty-text">Nie znaleziono kontaktów spełniających kryteria wyszukiwania.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ============================================
+        // DANE KONTAKTÓW (DUMMY DATA)
+        // ============================================
+        const contacts = [
+            {
+                id: 1,
+                name: "Andrzej Nowakowski",
+                title: "Dyrektor Techniczny",
+                company: "TechBud Sp. z o.o.",
+                address: "ul. Piotrkowska 125, 90-430 Łódź",
+                region: "łódzkie",
+                email: "a.nowakowski@techbud.pl",
+                phone: "+48 601 234 567",
+                owner: "Jan Kowalski",
+                lastActivity: "2024-01-15",
+                type: "klient",
+                avatarClass: "avatar-1"
+            },
+            {
+                id: 2,
+                name: "Maria Wiśniewska",
+                title: "Właściciel",
+                company: "Dach-Expert",
+                address: "ul. Marszałkowska 10, 00-626 Warszawa",
+                region: "mazowieckie",
+                email: "maria@dachexpert.pl",
+                phone: "+48 602 345 678",
+                owner: "Anna Nowak",
+                lastActivity: "2024-01-14",
+                type: "lead",
+                avatarClass: "avatar-2"
+            },
+            {
+                id: 3,
+                name: "Tomasz Kowalczyk",
+                title: "Kierownik Zakupów",
+                company: "BudMax S.A.",
+                address: "ul. Powstańców 45, 40-024 Katowice",
+                region: "śląskie",
+                email: "t.kowalczyk@budmax.com",
+                phone: "+48 603 456 789",
+                owner: "Jan Kowalski",
+                lastActivity: "2024-01-13",
+                type: "partner",
+                avatarClass: "avatar-3"
+            },
+            {
+                id: 4,
+                name: "Anna Zielińska",
+                title: "Prezes Zarządu",
+                company: "EkoDach Polska",
+                address: "ul. Grunwaldzka 82, 60-311 Poznań",
+                region: "wielkopolskie",
+                email: "a.zielinska@ekodach.pl",
+                phone: "+48 604 567 890",
+                owner: "Piotr Wiśniewski",
+                lastActivity: "2024-01-12",
+                type: "klient",
+                avatarClass: "avatar-4"
+            },
+            {
+                id: 5,
+                name: "Piotr Lewandowski",
+                title: "Specjalista ds. Inwestycji",
+                company: "Invest-Bud",
+                address: "ul. Długa 23, 31-147 Kraków",
+                region: "małopolskie",
+                email: "p.lewandowski@investbud.pl",
+                phone: "+48 605 678 901",
+                owner: "Anna Nowak",
+                lastActivity: "2024-01-11",
+                type: "dostawca",
+                avatarClass: "avatar-5"
+            },
+            {
+                id: 6,
+                name: "Katarzyna Dąbrowska",
+                title: "Menadżer Projektu",
+                company: "Nowoczesne Dachy",
+                address: "ul. Piłsudskiego 15, 50-048 Wrocław",
+                region: "dolnośląskie",
+                email: "k.dabrowska@nowoczesnedachy.pl",
+                phone: "+48 606 789 012",
+                owner: "Jan Kowalski",
+                lastActivity: "2024-01-10",
+                type: "klient",
+                avatarClass: "avatar-6"
+            },
+            {
+                id: 7,
+                name: "Robert Wójcik",
+                title: "Architekt",
+                company: "Architektura Plus",
+                address: "ul. Gdańska 100, 80-834 Gdańsk",
+                region: "pomorskie",
+                email: "r.wojcik@architekturaplus.pl",
+                phone: "+48 607 890 123",
+                owner: "Piotr Wiśniewski",
+                lastActivity: "2024-01-09",
+                type: "partner",
+                avatarClass: "avatar-7"
+            },
+            {
+                id: 8,
+                name: "Małgorzata Kamińska",
+                title: "Dyrektor Handlowy",
+                company: "HurtDach",
+                address: "ul. Toruńska 25, 85-023 Bydgoszcz",
+                region: "kujawsko-pomorskie",
+                email: "m.kaminska@hurtdach.com",
+                phone: "+48 608 901 234",
+                owner: "Anna Nowak",
+                lastActivity: "2024-01-08",
+                type: "dostawca",
+                avatarClass: "avatar-8"
+            },
+            {
+                id: 9,
+                name: "Krzysztof Mazur",
+                title: "Właściciel",
+                company: "DachMaster",
+                address: "ul. Wojska Polskiego 45, 70-470 Szczecin",
+                region: "zachodniopomorskie",
+                email: "k.mazur@dachmaster.pl",
+                phone: "+48 609 012 345",
+                owner: "Jan Kowalski",
+                lastActivity: "2024-01-07",
+                type: "lead",
+                avatarClass: "avatar-9"
+            },
+            {
+                id: 10,
+                name: "Ewa Pawlak",
+                title: "Kierownik Budowy",
+                company: "BudPro Development",
+                address: "ul. Krakowskie Przedmieście 10, 20-002 Lublin",
+                region: "lubelskie",
+                email: "e.pawlak@budpro.pl",
+                phone: "+48 610 123 456",
+                owner: "Piotr Wiśniewski",
+                lastActivity: "2024-01-06",
+                type: "klient",
+                avatarClass: "avatar-10"
+            }
+        ];
+
+        let filteredContacts = [...contacts];
+
+        // ============================================
+        // FUNKCJE RENDEROWANIA
+        // ============================================
+        function renderContacts() {
+            const tbody = document.getElementById('contactsTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (filteredContacts.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            tbody.innerHTML = filteredContacts.map(contact => `
+                <tr onclick="openContactDetails(${contact.id})">
+                    <td>
+                        <div class="contact-name-cell">
+                            <div class="contact-avatar ${contact.avatarClass}">
+                                ${contact.name.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-name">${contact.name}</div>
+                                <div class="contact-title">${contact.title}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="company-name">${contact.company}</span>
+                    </td>
+                    <td>
+                        <span class="address-text">${contact.address}</span>
+                    </td>
+                    <td>
+                        <a href="mailto:${contact.email}" class="contact-link" onclick="event.stopPropagation()">
+                            ${contact.email}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="tel:${contact.phone}" class="contact-link" onclick="event.stopPropagation()">
+                            ${contact.phone}
+                        </a>
+                    </td>
+                    <td>
+                        <span class="owner-badge">
+                            <span class="owner-dot"></span>
+                            ${contact.owner}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="activity-date ${isRecent(contact.lastActivity) ? 'activity-recent' : ''}">
+                            ${formatDate(contact.lastActivity)}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ============================================
+        // FUNKCJE POMOCNICZE
+        // ============================================
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Dzisiaj';
+            if (diffDays === 1) return 'Wczoraj';
+            if (diffDays < 7) return `${diffDays} dni temu`;
+            
+            return date.toLocaleDateString('pl-PL', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        function isRecent(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays <= 7;
+        }
+
+        // ============================================
+        // FILTROWANIE
+        // ============================================
+        function filterContacts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const regionFilter = document.getElementById('filterRegion').value;
+            const typeFilter = document.getElementById('filterType').value;
+            const ownerFilter = document.getElementById('filterOwner').value;
+            
+            filteredContacts = contacts.filter(contact => {
+                const matchesSearch = !searchTerm || 
+                    contact.name.toLowerCase().includes(searchTerm) ||
+                    contact.company.toLowerCase().includes(searchTerm) ||
+                    contact.email.toLowerCase().includes(searchTerm) ||
+                    contact.phone.includes(searchTerm);
+                
+                const matchesRegion = !regionFilter || contact.region === regionFilter;
+                const matchesType = !typeFilter || contact.type === typeFilter;
+                const matchesOwner = !ownerFilter || contact.owner === ownerFilter;
+                
+                return matchesSearch && matchesRegion && matchesType && matchesOwner;
+            });
+            
+            renderContacts();
+        }
+
+        // ============================================
+        // NAWIGACJA
+        // ============================================
+        function setActiveNav(element) {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        // ============================================
+        // AKCJE
+        // ============================================
+        function openContactDetails(id) {
+            const contact = contacts.find(c => c.id === id);
+            console.log('Otwieranie szczegółów kontaktu:', contact);
+            alert(`Szczegóły kontaktu: ${contact.name}\n${contact.company}\n${contact.email}`);
+        }
+
+        function openAddContactModal() {
+            console.log('Otwieranie formularza dodawania kontaktu');
+            alert('Formularz dodawania nowego kontaktu');
+        }
+
+        function handleLogout() {
+            if (confirm('Czy na pewno chcesz się wylogować?')) {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userData');
+                console.log('Wylogowano pomyślnie');
+                alert('Wylogowano pomyślnie. W prawdziwej aplikacji nastąpiłoby przekierowanie do strony logowania.');
+                // window.location.href = '/login';
+            }
+        }
+
+        // ============================================
+        // INICJALIZACJA
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sprawdź dane użytkownika
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                const user = JSON.parse(userData);
+                const userName = document.getElementById('userName');
+                const userEmail = document.getElementById('userEmail');
+                const userAvatar = document.getElementById('userAvatar');
+                
+                if (userName && user.name) {
+                    userName.textContent = user.name;
+                    const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    userAvatar.textContent = initials;
+                }
+                if (userEmail && user.email) {
+                    userEmail.textContent = user.email;
+                }
+            }
+            
+            // Renderuj kontakty
+            renderContacts();
+        });
+
+        // ============================================
+        // INFORMACJA DLA DEVELOPERA
+        // ============================================
+        console.log('%c📋 CRM Contacts System', 'color: #e58414; font-size: 20px; font-weight: bold;');
+        console.log('%cLista kontaktów załadowana pomyślnie', 'color: #10b981; font-weight: bold;');
+        console.log(`Liczba kontaktów: ${contacts.length}`);
+    </script>
+</body>
+</html>

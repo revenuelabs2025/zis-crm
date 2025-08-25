@@ -1105,8 +1105,21 @@
         }
 
         function openAddContactModal() {
-            console.log('Otwieranie formularza dodawania kontaktu');
-            alert('Formularz dodawania nowego kontaktu');
+            const modal = document.getElementById('addContactModal');
+            const form = document.getElementById('addContactForm');
+            if (form) {
+                form.reset();
+            }
+            if (modal) {
+                modal.classList.add('show');
+            }
+        }
+
+        function closeAddContactModal() {
+            const modal = document.getElementById('addContactModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
         }
 
         function handleLogout() {

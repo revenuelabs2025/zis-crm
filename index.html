@@ -743,7 +743,6 @@
             // Przekieruj po 2 sekundach
             setTimeout(() => {
                 // window.location.href = API_CONFIG.dashboardUrl;
-                console.log('Przekierowanie do dashboardu...', userData);
                 alert('Zalogowano pomyślnie! W prawdziwej aplikacji nastąpiłoby przekierowanie.');
             }, 2000);
         }
@@ -774,9 +773,8 @@
             setLoadingState(true);
             
             try {
-                // Użyj mockLogin podczas pracy bez backendu
-                const result = await mockLogin(state.formData.email, state.formData.password);
-                // const result = await realLogin(state.formData.email, state.formData.password);
+                const result = await realLogin(state.formData.email, state.formData.password);
+                // const result = await mockLogin(state.formData.email, state.formData.password);
                 
                 if (result.success) {
                     handleLoginSuccess(result.data);
@@ -830,14 +828,6 @@
         // Uruchom sprawdzenie przy załadowaniu strony
         document.addEventListener('DOMContentLoaded', checkAuthStatus);
 
-        // ============================================
-        // INFORMACJA DLA DEVELOPERA
-        // ============================================
-        console.log('%c🔐 CRM Login System', 'color: #e58414; font-size: 20px; font-weight: bold;');
-        console.log('%cDane testowe do logowania:', 'color: #059669; font-weight: bold;');
-        console.log('Email: admin@firma.pl | Hasło: admin123');
-        console.log('Email: jan.kowalski@firma.pl | Hasło: haslo123');
-        console.log('Email: test@test.pl | Hasło: test123');
     </script>
 </body>
 </html>

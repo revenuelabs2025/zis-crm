@@ -661,12 +661,43 @@
         // ============================================
         // SYMULACJA LOGOWANIA (MOCK)
         // ============================================
-        async function mockLogin(email, password) {
-            // Symulacja opóźnienia sieciowego
-            await new Promise(resolve => setTimeout(resolve, 1500));
+        const mockUsers = {
+            'admin@firma.pl': {
+                password: 'admin123',
+                name: 'Administrator',
+                role: 'admin'
+            },
+            'jan.kowalski@firma.pl': {
+                password: 'haslo123',
+                name: 'Jan Kowalski',
+                role: 'user'
+            },
+            'test@test.pl': {
+                password: 'test123',
+                name: 'Test User',
+                role: 'tester'
+            }
+        };
 
-            // Przekierowanie do prawdziwego logowania
-            return realLogin(email, password);
+        async function mockLogin(email, password) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const user = mockUsers[email];
+            if (!user || user.password !== password) {
+                return { success: false, error: 'Nieprawidłowe dane logowania' };
+            }
+
+            return {
+                success: true,
+                data: {
+                    token: 'mock-token',
+                    user: {
+                        email,
+                        name: user.name,
+                        role: user.role
+                    }
+                }
+            };
         }
 
         // ============================================
@@ -743,9 +774,9 @@
             setLoadingState(true);
             
             try {
-                // Użyj realLogin dla prawdziwego API
-                // const result = await mockLogin(state.formData.email, state.formData.password);
-                const result = await realLogin(state.formData.email, state.formData.password);
+                // Użyj mockLogin podczas pracy bez backendu
+                const result = await mockLogin(state.formData.email, state.formData.password);
+                // const result = await realLogin(state.formData.email, state.formData.password);
                 
                 if (result.success) {
                     handleLoginSuccess(result.data);

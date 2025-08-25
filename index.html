@@ -287,33 +287,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Divider */
-        .divider {
-            margin: 24px 0;
-            text-align: center;
-            position: relative;
-        }
-
-        .divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: #E5E7EB;
-        }
-
-        .divider span {
-            background: white;
-            padding: 0 16px;
-            color: #9CA3AF;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            position: relative;
-        }
-
         /* Footer */
         .login-footer {
             padding: 20px;
@@ -546,10 +519,6 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0YmxkdGJ2cm1nb2lzeWttaXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMTk0MDIsImV4cCI6MjA3MTY5NTQwMn0.xyC0Osw4u--L3kdCF76ih1CSLFA16FKyz9I9PNt33zI';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const API_CONFIG = {
-            dashboardUrl: '/dashboard'   // URL do przekierowania po zalogowaniu
-        };
-
         // ============================================
         // STAN APLIKACJI
         // ============================================
@@ -662,48 +631,6 @@
         }
 
         // ============================================
-        // SYMULACJA LOGOWANIA (MOCK)
-        // ============================================
-        const mockUsers = {
-            'admin@firma.pl': {
-                password: 'admin123',
-                name: 'Administrator',
-                role: 'admin'
-            },
-            'jan.kowalski@firma.pl': {
-                password: 'haslo123',
-                name: 'Jan Kowalski',
-                role: 'user'
-            },
-            'test@test.pl': {
-                password: 'test123',
-                name: 'Test User',
-                role: 'tester'
-            }
-        };
-
-        async function mockLogin(email, password) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            const user = mockUsers[email];
-            if (!user || user.password !== password) {
-                return { success: false, error: 'Nieprawidłowe dane logowania' };
-            }
-
-            return {
-                success: true,
-                data: {
-                    token: 'mock-token',
-                    user: {
-                        email,
-                        name: user.name,
-                        role: user.role
-                    }
-                }
-            };
-        }
-
-        // ============================================
         // RZECZYWISTE LOGOWANIE (UŻYWAJ Z PRAWDZIWYM API)
         // ============================================
         async function realLogin(email, password) {
@@ -740,7 +667,6 @@
             
             // Przekieruj po 2 sekundach
             setTimeout(() => {
-                // window.location.href = API_CONFIG.dashboardUrl;
                 alert('Zalogowano pomyślnie! W prawdziwej aplikacji nastąpiłoby przekierowanie.');
             }, 2000);
         }
@@ -769,11 +695,10 @@
             
             // Rozpocznij logowanie
             setLoadingState(true);
-            
+
             try {
                 const result = await realLogin(state.formData.email, state.formData.password);
-                // const result = await mockLogin(state.formData.email, state.formData.password);
-                
+
                 if (result.success) {
                     handleLoginSuccess(result.data);
                 } else {
@@ -808,22 +733,6 @@
             }
             clearGeneralError();
         });
-
-        // ============================================
-        // INICJALIZACJA
-        // ============================================
-        
-        // Sprawdź czy użytkownik jest już zalogowany
-        async function checkAuthStatus() {
-            const { data } = await supabaseClient.auth.getSession();
-            if (data.session) {
-                console.log('Użytkownik już zalogowany');
-                // window.location.href = API_CONFIG.dashboardUrl;
-            }
-        }
-
-        // Uruchom sprawdzenie przy załadowaniu strony
-        document.addEventListener('DOMContentLoaded', checkAuthStatus);
 
     </script>
 </body>

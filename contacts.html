@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRM System - Kontakty</title>
     <style>
-        /* Reset i podstawowe style */
+/* Reset i podstawowe style */
         * {
             margin: 0;
             padding: 0;
@@ -318,25 +318,10 @@
         }
 
         /* Contact name */
-        .contact-name-cell {
-            display: flex;
-            align-items: center;
-        }
-
-        .contact-info {
-            display: flex;
-            flex-direction: column;
-        }
-
         .contact-name {
             font-weight: 600;
             color: #1a1a1a;
-            margin-bottom: 2px;
-        }
-
-        .contact-title {
-            font-size: 13px;
-            color: #9ca3af;
+            font-size: 14px;
         }
 
         /* Company */
@@ -422,7 +407,198 @@
             font-size: 14px;
         }
 
-        /* Responsive */
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #e5e7eb;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group-full {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-label span {
+            color: #ef4444;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #e58414;
+            box-shadow: 0 0 0 3px rgba(229, 132, 20, 0.08);
+        }
+
+        .form-input.error,
+        .form-select.error {
+            border-color: #ef4444;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-cancel {
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
+        }
+
+        .btn-cancel:hover {
+            background: #f3f4f6;
+        }
+
+        .btn-primary {
+            background: #e58414;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #d47812;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(229, 132, 20, 0.2);
+        }
+
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+            }
+        }
         @media (max-width: 1024px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -976,5 +1152,138 @@
         console.log('%cLista kontaktów załadowana pomyślnie', 'color: #10b981; font-weight: bold;');
         console.log(`Liczba kontaktów: ${contacts.length}`);
     </script>
+    <!-- Modal dodawania kontaktu -->
+    <div class="modal" id="addContactModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Dodaj nowy kontakt</h2>
+                <button class="modal-close" onclick="closeAddContactModal()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="addContactForm" onsubmit="handleAddContact(event)">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <!-- Imię i nazwisko -->
+                        <div class="form-group-full">
+                            <label class="form-label">Imię i nazwisko <span>*</span></label>
+                            <input type="text" class="form-input" id="contactName" required>
+                            <div class="error-message" id="nameError"></div>
+                        </div>
+
+                        <!-- Firma -->
+                        <div class="form-group-full">
+                            <label class="form-label">Firma <span>*</span></label>
+                            <input type="text" class="form-input" id="contactCompany" required>
+                            <div class="error-message" id="companyError"></div>
+                        </div>
+
+                        <!-- Adres firmy -->
+                        <div class="form-group-full">
+                            <label class="form-label">Adres firmy</label>
+                            <input type="text" class="form-input" id="contactAddress" placeholder="np. ul. Główna 123">
+                        </div>
+
+                        <!-- Województwo -->
+                        <div>
+                            <label class="form-label">Województwo <span>*</span></label>
+                            <select class="form-select" id="contactRegion" required>
+                                <option value="">Wybierz województwo</option>
+                                <option value="dolnośląskie">Dolnośląskie</option>
+                                <option value="kujawsko-pomorskie">Kujawsko-Pomorskie</option>
+                                <option value="lubelskie">Lubelskie</option>
+                                <option value="lubuskie">Lubuskie</option>
+                                <option value="łódzkie">Łódzkie</option>
+                                <option value="małopolskie">Małopolskie</option>
+                                <option value="mazowieckie">Mazowieckie</option>
+                                <option value="opolskie">Opolskie</option>
+                                <option value="podkarpackie">Podkarpackie</option>
+                                <option value="podlaskie">Podlaskie</option>
+                                <option value="pomorskie">Pomorskie</option>
+                                <option value="śląskie">Śląskie</option>
+                                <option value="świętokrzyskie">Świętokrzyskie</option>
+                                <option value="warmińsko-mazurskie">Warmińsko-Mazurskie</option>
+                                <option value="wielkopolskie">Wielkopolskie</option>
+                                <option value="zachodniopomorskie">Zachodniopomorskie</option>
+                            </select>
+                            <div class="error-message" id="regionError"></div>
+                        </div>
+
+                        <!-- Miejscowość -->
+                        <div>
+                            <label class="form-label">Miejscowość <span>*</span></label>
+                            <input type="text" class="form-input" id="contactCity" required>
+                            <div class="error-message" id="cityError"></div>
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="form-label">Email <span>*</span></label>
+                            <input type="email" class="form-input" id="contactEmail" required>
+                            <div class="error-message" id="emailError"></div>
+                        </div>
+
+                        <!-- Telefon -->
+                        <div>
+                            <label class="form-label">Numer telefonu <span>*</span></label>
+                            <input type="tel" class="form-input" id="contactPhone" placeholder="+48 XXX XXX XXX" required>
+                            <div class="error-message" id="phoneError"></div>
+                        </div>
+
+                        <!-- Właściciel kontaktu -->
+                        <div>
+                            <label class="form-label">Właściciel kontaktu <span>*</span></label>
+                            <select class="form-select" id="contactOwner" required>
+                                <option value="">Wybierz właściciela</option>
+                                <option value="Jan Kowalski">Jan Kowalski</option>
+                                <option value="Anna Nowak">Anna Nowak</option>
+                                <option value="Piotr Wiśniewski">Piotr Wiśniewski</option>
+                            </select>
+                            <div class="error-message" id="ownerError"></div>
+                        </div>
+
+                        <!-- Typ kontaktu -->
+                        <div>
+                            <label class="form-label">Typ kontaktu <span>*</span></label>
+                            <select class="form-select" id="contactType" required>
+                                <option value="">Wybierz typ</option>
+                                <option value="klient">Klient</option>
+                                <option value="lead">Lead</option>
+                                <option value="partner">Partner</option>
+                                <option value="dostawca">Dostawca</option>
+                            </select>
+                            <div class="error-message" id="typeError"></div>
+                        </div>
+
+                        <!-- Źródło pozyskania -->
+                        <div class="form-group-full">
+                            <label class="form-label">Źródło pozyskania <span>*</span></label>
+                            <select class="form-select" id="contactSource" required>
+                                <option value="">Wybierz źródło</option>
+                                <option value="strona-www">Strona internetowa</option>
+                                <option value="telefon">Telefon przychodzący</option>
+                                <option value="email">Email</option>
+                                <option value="targi">Targi</option>
+                                <option value="rekomendacja">Rekomendacja</option>
+                                <option value="cold-calling">Cold calling</option>
+                                <option value="social-media">Social media</option>
+                                <option value="inne">Inne</option>
+                            </select>
+                            <div class="error-message" id="sourceError"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" onclick="closeAddContactModal()">Anuluj</button>
+                    <button type="submit" class="btn btn-primary" id="saveContactBtn">Zapisz kontakt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </body>
 </html>

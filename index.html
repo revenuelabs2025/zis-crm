@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM System - Logowanie</title>
+    <style>
+        /* Reset i podstawowe style */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+        }
+
+        /* Kontener główny */
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Karta logowania */
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        /* Nagłówek */
+        .login-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .login-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: #e58414;
+            border-radius: 2px;
+        }
+
+        .logo {
+            width: 140px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            background: white;
+            padding: 15px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .login-header h1 {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .login-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        /* Formularz */
+        .login-form {
+            padding: 40px 30px 30px;
+            background: white;
+        }
+
+        /* Alert błędów */
+        .error-alert {
+            background: #FEF2F2;
+            border-left: 4px solid #EF4444;
+            color: #991B1B;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            animation: shake 0.5s;
+        }
+
+        .error-alert.show {
+            display: block;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(2px); }
+        }
+
+        /* Grupa pól formularza */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.025em;
+        }
+
+        /* Kontener input z ikoną */
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: #9CA3AF;
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 14px 12px 44px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s;
+            outline: none;
+            background: #FAFBFC;
+        }
+
+        .form-input:hover {
+            border-color: #D1D5DB;
+        }
+
+        .form-input:focus {
+            border-color: #e58414;
+            box-shadow: 0 0 0 4px rgba(229, 132, 20, 0.08);
+            background: white;
+        }
+
+        .form-input:focus + .input-icon {
+            color: #e58414;
+        }
+
+        .form-input.error {
+            border-color: #EF4444;
+            background: #FEF2F2;
+        }
+
+        .form-input.error + .input-icon {
+            color: #EF4444;
+        }
+
+        .form-input:disabled {
+            background: #F3F4F6;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Komunikat błędu pola */
+        .field-error {
+            color: #EF4444;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .field-error.show {
+            display: block;
+        }
+
+        /* Przycisk logowania */
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            background: #e58414;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.025em;
+        }
+
+        .login-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .login-button:hover:not(:disabled) {
+            background: #d47812;
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(229, 132, 20, 0.25);
+        }
+
+        .login-button:hover:not(:disabled)::before {
+            opacity: 1;
+        }
+
+        .login-button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(229, 132, 20, 0.2);
+        }
+
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            background: #9CA3AF;
+        }
+
+        /* Spinner */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        .login-button.loading .button-text {
+            display: none;
+        }
+
+        .login-button.loading .spinner {
+            display: block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Divider */
+        .divider {
+            margin: 24px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #E5E7EB;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 16px;
+            color: #9CA3AF;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+        }
+
+        /* Footer */
+        .login-footer {
+            padding: 20px;
+            background: #FAFBFC;
+            text-align: center;
+            border-top: 1px solid #F3F4F6;
+        }
+
+        .login-footer p {
+            color: #9CA3AF;
+            font-size: 12px;
+        }
+
+        /* Success state */
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s ease-out;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+
+        .success-message h2 {
+            color: #1F2937;
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .success-message p {
+            color: #6B7280;
+            font-size: 14px;
+        }
+
+        /* Decorative elements */
+        .decoration {
+            position: fixed;
+            border-radius: 50%;
+            opacity: 0.05;
+            background: #e58414;
+            pointer-events: none;
+        }
+
+        .decoration-1 {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            right: -150px;
+        }
+
+        .decoration-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -100px;
+            left: -100px;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-form {
+                padding: 30px 20px 20px;
+            }
+            
+            .login-header {
+                padding: 30px 20px;
+            }
+
+            .logo {
+                width: 120px;
+            }
+        }
+
+        /* Subtle animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Premium feel */
+        .form-input::placeholder {
+            color: #B8BCC3;
+        }
+
+        /* Info text */
+        .info-text {
+            margin-top: 20px;
+            padding: 12px;
+            background: #F0F9FF;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #0369A1;
+            text-align: center;
+            border: 1px solid #BAE6FD;
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative elements -->
+    <div class="decoration decoration-1"></div>
+    <div class="decoration decoration-2"></div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Nagłówek -->
+            <div class="login-header">
+                <div class="logo">
+                    <img src="http://dachplaski24.pl/wp-content/uploads/2025/08/LOGO-ZIS-ZAWADZKI.jpg" alt="ZIS Zawadzki Logo">
+                </div>
+                <h1>System CRM</h1>
+                <p>Panel administracyjny</p>
+            </div>
+
+            <!-- Formularz logowania -->
+            <div class="login-form" id="loginForm">
+                <!-- Alert błędów -->
+                <div class="error-alert" id="errorAlert"></div>
+
+                <form id="loginFormElement">
+                    <!-- Pole Email -->
+                    <div class="form-group">
+                        <label for="email" class="form-label">Adres email</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                class="form-input" 
+                                placeholder="jan.kowalski@firma.pl"
+                                autocomplete="email"
+                                required
+                            >
+                            <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                            </svg>
+                        </div>
+                        <div class="field-error" id="emailError"></div>
+                    </div>
+
+                    <!-- Pole Hasło -->
+                    <div class="form-group">
+                        <label for="password" class="form-label">Hasło</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                class="form-input" 
+                                placeholder="••••••••"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="field-error" id="passwordError"></div>
+                    </div>
+
+                    <!-- Przycisk logowania -->
+                    <button type="submit" class="login-button" id="loginButton">
+                        <span class="button-text">Zaloguj się</span>
+                        <div class="spinner"></div>
+                    </button>
+
+                    <!-- Info -->
+                    <div class="info-text">
+                        🔒 Dostęp tylko dla autoryzowanych użytkowników
+                    </div>
+                </form>
+            </div>
+
+            <!-- Komunikat sukcesu (ukryty domyślnie) -->
+            <div class="success-message" id="successMessage">
+                <div class="success-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h2>Zalogowano pomyślnie!</h2>
+                <p>Przekierowywanie do panelu...</p>
+            </div>
+
+            <!-- Footer -->
+            <div class="login-footer">
+                <p>© 2024 ZIS Zawadzki • System CRM</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // KONFIGURACJA
+        // ============================================
+        
+        // Tutaj normalnie byłaby konfiguracja Supabase
+        // Dla demo używamy mock API
+        const API_CONFIG = {
+            loginEndpoint: '/api/login', // Zmień na swój endpoint
+            dashboardUrl: '/dashboard'   // URL do przekierowania po zalogowaniu
+        };
+
+        // ============================================
+        // STAN APLIKACJI
+        // ============================================
+        const state = {
+            isLoading: false,
+            errors: {},
+            formData: {
+                email: '',
+                password: ''
+            }
+        };
+
+        // ============================================
+        // REFERENCJE DO ELEMENTÓW DOM
+        // ============================================
+        const elements = {
+            form: document.getElementById('loginFormElement'),
+            emailInput: document.getElementById('email'),
+            passwordInput: document.getElementById('password'),
+            emailError: document.getElementById('emailError'),
+            passwordError: document.getElementById('passwordError'),
+            errorAlert: document.getElementById('errorAlert'),
+            loginButton: document.getElementById('loginButton'),
+            loginForm: document.getElementById('loginForm'),
+            successMessage: document.getElementById('successMessage')
+        };
+
+        // ============================================
+        // WALIDACJA
+        // ============================================
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function validateForm() {
+            const errors = {};
+            
+            // Walidacja email
+            if (!state.formData.email) {
+                errors.email = 'Email jest wymagany';
+            } else if (!validateEmail(state.formData.email)) {
+                errors.email = 'Nieprawidłowy format email';
+            }
+            
+            // Walidacja hasła
+            if (!state.formData.password) {
+                errors.password = 'Hasło jest wymagane';
+            } else if (state.formData.password.length < 6) {
+                errors.password = 'Hasło musi mieć minimum 6 znaków';
+            }
+            
+            return errors;
+        }
+
+        // ============================================
+        // WYŚWIETLANIE BŁĘDÓW
+        // ============================================
+        function showFieldError(field, message) {
+            const errorElement = field === 'email' ? elements.emailError : elements.passwordError;
+            const inputElement = field === 'email' ? elements.emailInput : elements.passwordInput;
+            
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+            inputElement.classList.add('error');
+        }
+
+        function clearFieldError(field) {
+            const errorElement = field === 'email' ? elements.emailError : elements.passwordError;
+            const inputElement = field === 'email' ? elements.emailInput : elements.passwordInput;
+            
+            errorElement.textContent = '';
+            errorElement.classList.remove('show');
+            inputElement.classList.remove('error');
+        }
+
+        function showGeneralError(message) {
+            elements.errorAlert.textContent = message;
+            elements.errorAlert.classList.add('show');
+        }
+
+        function clearGeneralError() {
+            elements.errorAlert.textContent = '';
+            elements.errorAlert.classList.remove('show');
+        }
+
+        function clearAllErrors() {
+            clearFieldError('email');
+            clearFieldError('password');
+            clearGeneralError();
+        }
+
+        // ============================================
+        // OBSŁUGA STANU ŁADOWANIA
+        // ============================================
+        function setLoadingState(isLoading) {
+            state.isLoading = isLoading;
+            
+            if (isLoading) {
+                elements.loginButton.classList.add('loading');
+                elements.loginButton.disabled = true;
+                elements.emailInput.disabled = true;
+                elements.passwordInput.disabled = true;
+            } else {
+                elements.loginButton.classList.remove('loading');
+                elements.loginButton.disabled = false;
+                elements.emailInput.disabled = false;
+                elements.passwordInput.disabled = false;
+            }
+        }
+
+        // ============================================
+        // SYMULACJA LOGOWANIA (MOCK)
+        // ============================================
+        async function mockLogin(email, password) {
+            // Symulacja opóźnienia sieciowego
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Przykładowe dane testowe
+            const validUsers = [
+                { email: 'admin@firma.pl', password: 'admin123' },
+                { email: 'jan.kowalski@firma.pl', password: 'haslo123' },
+                { email: 'test@test.pl', password: 'test123' }
+            ];
+            
+            const user = validUsers.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                return {
+                    success: true,
+                    data: {
+                        id: Math.random().toString(36).substr(2, 9),
+                        email: user.email,
+                        name: user.email.split('@')[0],
+                        token: 'mock-jwt-token-' + Math.random().toString(36).substr(2)
+                    }
+                };
+            } else {
+                return {
+                    success: false,
+                    error: 'Nieprawidłowy email lub hasło'
+                };
+            }
+        }
+
+        // ============================================
+        // RZECZYWISTE LOGOWANIE (UŻYWAJ Z PRAWDZIWYM API)
+        // ============================================
+        async function realLogin(email, password) {
+            try {
+                const response = await fetch(API_CONFIG.loginEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    return { success: true, data };
+                } else {
+                    return { success: false, error: data.message || 'Błąd logowania' };
+                }
+            } catch (error) {
+                console.error('Błąd połączenia:', error);
+                return { success: false, error: 'Błąd połączenia z serwerem' };
+            }
+        }
+
+        // ============================================
+        // OBSŁUGA SUKCESU LOGOWANIA
+        // ============================================
+        function handleLoginSuccess(userData) {
+            // Zapisz token w localStorage lub sessionStorage
+            if (userData.token) {
+                localStorage.setItem('authToken', userData.token);
+                localStorage.setItem('userData', JSON.stringify(userData));
+            }
+            
+            // Pokaż komunikat sukcesu
+            elements.loginForm.style.display = 'none';
+            elements.successMessage.classList.add('show');
+            
+            // Przekieruj po 2 sekundach
+            setTimeout(() => {
+                // window.location.href = API_CONFIG.dashboardUrl;
+                console.log('Przekierowanie do dashboardu...', userData);
+                alert('Zalogowano pomyślnie! W prawdziwej aplikacji nastąpiłoby przekierowanie.');
+            }, 2000);
+        }
+
+        // ============================================
+        // OBSŁUGA FORMULARZA
+        // ============================================
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            // Wyczyść poprzednie błędy
+            clearAllErrors();
+            
+            // Pobierz dane z formularza
+            state.formData.email = elements.emailInput.value.trim();
+            state.formData.password = elements.passwordInput.value;
+            
+            // Walidacja
+            const errors = validateForm();
+            if (Object.keys(errors).length > 0) {
+                Object.entries(errors).forEach(([field, message]) => {
+                    showFieldError(field, message);
+                });
+                return;
+            }
+            
+            // Rozpocznij logowanie
+            setLoadingState(true);
+            
+            try {
+                // Użyj mockLogin dla demo lub realLogin dla prawdziwego API
+                const result = await mockLogin(state.formData.email, state.formData.password);
+                // const result = await realLogin(state.formData.email, state.formData.password);
+                
+                if (result.success) {
+                    handleLoginSuccess(result.data);
+                } else {
+                    showGeneralError(result.error);
+                    setLoadingState(false);
+                }
+            } catch (error) {
+                console.error('Błąd podczas logowania:', error);
+                showGeneralError('Wystąpił nieoczekiwany błąd. Spróbuj ponownie.');
+                setLoadingState(false);
+            }
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        
+        // Obsługa submit formularza
+        elements.form.addEventListener('submit', handleSubmit);
+
+        // Czyszczenie błędów podczas pisania
+        elements.emailInput.addEventListener('input', () => {
+            if (state.errors.email) {
+                clearFieldError('email');
+            }
+            clearGeneralError();
+        });
+
+        elements.passwordInput.addEventListener('input', () => {
+            if (state.errors.password) {
+                clearFieldError('password');
+            }
+            clearGeneralError();
+        });
+
+        // ============================================
+        // INICJALIZACJA
+        // ============================================
+        
+        // Sprawdź czy użytkownik jest już zalogowany
+        function checkAuthStatus() {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                // Opcjonalnie: zweryfikuj token z backendem
+                console.log('Użytkownik już zalogowany');
+                // window.location.href = API_CONFIG.dashboardUrl;
+            }
+        }
+
+        // Uruchom sprawdzenie przy załadowaniu strony
+        document.addEventListener('DOMContentLoaded', checkAuthStatus);
+
+        // ============================================
+        // INFORMACJA DLA DEVELOPERA
+        // ============================================
+        console.log('%c🔐 CRM Login System', 'color: #e58414; font-size: 20px; font-weight: bold;');
+        console.log('%cDane testowe do logowania:', 'color: #059669; font-weight: bold;');
+        console.log('Email: admin@firma.pl | Hasło: admin123');
+        console.log('Email: jan.kowalski@firma.pl | Hasło: haslo123');
+        console.log('Email: test@test.pl | Hasło: test123');
+    </script>
+</body>
+</html>

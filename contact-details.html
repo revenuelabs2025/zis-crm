@@ -1516,6 +1516,30 @@
         </div>
     </div>
 
+    <!-- Modal dodawania wiadomości -->
+    <div class="modal" id="addMessageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Dodaj wiadomość</h2>
+                <button class="modal-close" onclick="closeAddMessageModal()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="messageText">Treść wiadomości</label>
+                    <textarea id="messageText" class="form-input" rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="closeAddMessageModal()">Anuluj</button>
+                <button class="btn btn-primary" onclick="saveMessage()">Zapisz</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const appUsers = ['Jan Kowalski', 'Anna Nowak', 'Piotr Zieliński'];
         let currentUserName = '';
@@ -1836,8 +1860,63 @@
         }
 
         function composeMessage() {
-            console.log('Otwieranie okna tworzenia wiadomości');
-            alert('Otwieranie formularza nowej wiadomości email');
+            const modal = document.getElementById('addMessageModal');
+            if (modal) {
+                modal.classList.add('show');
+            }
+        }
+
+        function closeAddMessageModal() {
+            const modal = document.getElementById('addMessageModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+            const input = document.getElementById('messageText');
+            if (input) {
+                input.value = '';
+            }
+        }
+
+        function saveMessage() {
+            const text = document.getElementById('messageText').value.trim();
+            if (!text) {
+                alert('Wprowadź treść wiadomości');
+                return;
+            }
+
+            const messagesTab = document.getElementById('messages-tab');
+            const messageItem = document.createElement('div');
+            messageItem.className = 'message-item';
+            messageItem.onclick = function() { openMessage(); };
+
+            const header = document.createElement('div');
+            header.className = 'message-header';
+
+            const type = document.createElement('div');
+            type.className = 'message-type';
+            type.innerHTML = '<svg class="message-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>Wiadomość';
+
+            const dateSpan = document.createElement('span');
+            dateSpan.className = 'message-date';
+            dateSpan.textContent = new Date().toLocaleString('pl-PL');
+
+            header.appendChild(type);
+            header.appendChild(dateSpan);
+            messageItem.appendChild(header);
+
+            const preview = document.createElement('div');
+            preview.className = 'message-preview';
+            preview.textContent = text;
+            messageItem.appendChild(preview);
+
+            const firstMessage = messagesTab.querySelector('.message-item');
+            if (firstMessage) {
+                messagesTab.insertBefore(messageItem, firstMessage);
+            } else {
+                messagesTab.appendChild(messageItem);
+            }
+
+            closeAddMessageModal();
         }
 
         const messagesData = {

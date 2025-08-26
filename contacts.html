@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRM System - Kontakty</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <style>
 /* Reset i podstawowe style */
         * {
@@ -729,10 +730,10 @@
 
         <div class="user-section">
             <div class="user-info">
-                <div class="user-avatar" id="userAvatar">JK</div>
+                <div class="user-avatar" id="userAvatar"></div>
                 <div class="user-details">
-                    <div class="user-name" id="userName">Jan Kowalski</div>
-                    <div class="user-email" id="userEmail">jan.kowalski@firma.pl</div>
+                    <div class="user-name" id="userName"></div>
+                    <div class="user-email" id="userEmail"></div>
                 </div>
             </div>
             <button class="logout-btn" onclick="handleLogout()">
@@ -829,6 +830,10 @@
     </main>
 
     <script>
+        const SUPABASE_URL = 'https://atbldtbvrmgoisykmizn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0YmxkdGJ2cm1nb2lzeWttaXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMTk0MDIsImV4cCI6MjA3MTY5NTQwMn0.xyC0Osw4u--L3kdCF76ih1CSLFA16FKyz9I9PNt33zI';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         // ============================================
         // DANE KONTAKTÓW (DUMMY DATA)
         // ============================================
@@ -1133,36 +1138,41 @@
         // ============================================
         // INICJALIZACJA
         // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             const token = localStorage.getItem('authToken');
             if (!token) {
                 window.location.href = 'index.html';
                 return;
             }
 
-            // Sprawdź dane użytkownika
-            const userData = localStorage.getItem('userData');
-            if (userData) {
-                const user = JSON.parse(userData);
-                const userName = document.getElementById('userName');
-                const userEmail = document.getElementById('userEmail');
-                const userAvatar = document.getElementById('userAvatar');
+            const { data: authData } = await supabaseClient.auth.getUser(token);
+            const login = authData?.user?.email;
 
-                const fullName = user.name || [user.first_name, user.last_name].filter(Boolean).join(' ');
-                if (userName && fullName) {
-                    userName.textContent = fullName;
-                    const initials = fullName
-                        .split(' ')
-                        .map(n => n[0])
-                        .join('')
-                        .toUpperCase();
-                    userAvatar.textContent = initials;
-                }
-                if (userEmail && user.email) {
-                    userEmail.textContent = user.email;
-                }
+            if (!login) {
+                window.location.href = 'index.html';
+                return;
             }
-            
+
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('full_name')
+                .eq('login', login)
+                .single();
+
+            const fullName = profile?.full_name || login;
+            const userName = document.getElementById('userName');
+            const userEmail = document.getElementById('userEmail');
+            const userAvatar = document.getElementById('userAvatar');
+
+            userName.textContent = fullName;
+            userEmail.textContent = login;
+            const initials = fullName
+                .split(' ')
+                .map(n => n[0])
+                .join('')
+                .toUpperCase();
+            userAvatar.textContent = initials;
+
             // Renderuj kontakty
             renderContacts();
         });

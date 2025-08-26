@@ -2064,7 +2064,8 @@
                 document.getElementById('userName').textContent = currentUserName;
                 document.getElementById('userEmail').textContent = user.email || 'jan.kowalski@firma.pl';
 
-                const initials = currentUserName
+                const initials = (user.name || '')
+               
                     .split(' ')
                     .map(n => n[0])
                     .join('')

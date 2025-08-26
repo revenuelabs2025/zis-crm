@@ -678,6 +678,7 @@
             font-size: 14px;
             transition: all 0.2s;
             background: white;
+            font-family: inherit;
         }
 
         .form-input:focus {
@@ -711,6 +712,7 @@
             cursor: pointer;
             transition: all 0.2s;
             border: none;
+            font-family: inherit;
         }
 
         .btn-cancel {
@@ -1364,6 +1366,10 @@
                         <textarea id="taskDescription" class="form-input" rows="3"></textarea>
                     </div>
                     <div class="form-group">
+                        <label class="form-label" for="taskOwner">Osoba odpowiedzialna</label>
+                        <select id="taskOwner" class="form-input"></select>
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Termin</label>
                         <div class="date-time-row">
                             <input type="date" id="taskDate" class="form-input">
@@ -1461,6 +1467,9 @@
     </div>
 
     <script>
+        const appUsers = ['Jan Kowalski', 'Anna Nowak', 'Piotr Zieliński'];
+        let currentUserName = '';
+
         // Funkcje nawigacyjne
         function setActiveNav(element) {
             document.querySelectorAll('.nav-item').forEach(item => {
@@ -1702,6 +1711,10 @@
             document.getElementById('taskDescription').value = '';
             document.getElementById('taskDate').value = '';
             document.getElementById('taskTime').value = '';
+            const ownerSelect = document.getElementById('taskOwner');
+            if (ownerSelect) {
+                ownerSelect.value = currentUserName;
+            }
         }
 
         function saveTask(event) {
@@ -1710,6 +1723,7 @@
             const description = document.getElementById('taskDescription').value.trim();
             const date = document.getElementById('taskDate').value;
             const time = document.getElementById('taskTime').value;
+            const owner = document.getElementById('taskOwner').value;
 
             if (!title) {
                 alert('Wprowadź nazwę zadania');
@@ -1758,7 +1772,7 @@
             }
 
             const assignedSpan = document.createElement('span');
-            assignedSpan.textContent = 'Przypisane: Ty';
+            assignedSpan.textContent = `Przypisane: ${owner === currentUserName ? 'Ty' : owner}`;
             meta.appendChild(assignedSpan);
 
             details.appendChild(meta);
@@ -1854,9 +1868,24 @@
             const userData = localStorage.getItem('userData');
             if (userData) {
                 const user = JSON.parse(userData);
-                document.getElementById('userName').textContent = user.name || 'Jan Kowalski';
+                currentUserName = user.name || 'Jan Kowalski';
+                document.getElementById('userName').textContent = currentUserName;
                 document.getElementById('userEmail').textContent = user.email || 'jan.kowalski@firma.pl';
                 document.getElementById('userAvatar').textContent = 'JK';
+            } else {
+                currentUserName = 'Jan Kowalski';
+            }
+
+            const ownerSelect = document.getElementById('taskOwner');
+            if (ownerSelect) {
+                const uniqueUsers = new Set([...appUsers, currentUserName]);
+                uniqueUsers.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    ownerSelect.appendChild(option);
+                });
+                ownerSelect.value = currentUserName;
             }
 
             const existingNotes = document.querySelectorAll('#notes-tab .note-item');

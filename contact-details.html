@@ -666,6 +666,10 @@
             color: #374151;
         }
 
+        .form-label span {
+            color: #ef4444;
+        }
+
         .form-input {
             width: 100%;
             padding: 10px 12px;
@@ -680,6 +684,15 @@
             outline: none;
             border-color: #e58414;
             box-shadow: 0 0 0 3px rgba(229,132,20,0.08);
+        }
+
+        .date-time-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .date-time-row .form-input {
+            flex: 1;
         }
 
         .modal-footer {
@@ -780,6 +793,12 @@
             font-size: 14px;
             font-weight: 500;
             color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .task-desc {
+            font-size: 13px;
+            color: #6b7280;
             margin-bottom: 4px;
         }
 
@@ -1323,6 +1342,43 @@
         </div>
     </main>
 
+    <!-- Modal dodawania zadania -->
+    <div class="modal" id="addTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Dodaj zadanie</h2>
+                <button class="modal-close" onclick="closeAddTaskModal()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="addTaskForm" onsubmit="saveTask(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="taskTitle">Nazwa zadania <span>*</span></label>
+                        <input type="text" id="taskTitle" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="taskDescription">Opis</label>
+                        <textarea id="taskDescription" class="form-input" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Termin</label>
+                        <div class="date-time-row">
+                            <input type="date" id="taskDate" class="form-input">
+                            <input type="time" id="taskTime" class="form-input">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" onclick="closeAddTaskModal()">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Zapisz</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal dodawania notatki -->
     <div class="modal" id="addNoteModal">
         <div class="modal-content">
@@ -1631,11 +1687,88 @@
         }
 
         function addTask() {
-            const taskTitle = prompt('Tytuł zadania:');
-            if (taskTitle) {
-                console.log('Dodawanie zadania:', taskTitle);
-                alert('Zadanie zostało dodane');
+            const modal = document.getElementById('addTaskModal');
+            if (modal) {
+                modal.classList.add('show');
             }
+        }
+
+        function closeAddTaskModal() {
+            const modal = document.getElementById('addTaskModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDescription').value = '';
+            document.getElementById('taskDate').value = '';
+            document.getElementById('taskTime').value = '';
+        }
+
+        function saveTask(event) {
+            event.preventDefault();
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDescription').value.trim();
+            const date = document.getElementById('taskDate').value;
+            const time = document.getElementById('taskTime').value;
+
+            if (!title) {
+                alert('Wprowadź nazwę zadania');
+                return;
+            }
+
+            const tasksTab = document.getElementById('tasks-tab');
+            const taskItem = document.createElement('div');
+            taskItem.className = 'task-item';
+            taskItem.onclick = function() { toggleTask(taskItem); };
+
+            const checkbox = document.createElement('div');
+            checkbox.className = 'task-checkbox';
+
+            const details = document.createElement('div');
+            details.className = 'task-details';
+
+            const taskTitle = document.createElement('div');
+            taskTitle.className = 'task-title';
+            taskTitle.textContent = title;
+            details.appendChild(taskTitle);
+
+            if (description) {
+                const descEl = document.createElement('div');
+                descEl.className = 'task-desc';
+                descEl.textContent = description;
+                details.appendChild(descEl);
+            }
+
+            const meta = document.createElement('div');
+            meta.className = 'task-meta';
+
+            if (date || time) {
+                const dueSpan = document.createElement('span');
+                dueSpan.className = 'task-due';
+                let dueText = 'Termin:';
+                if (date) {
+                    const formattedDate = new Date(date).toLocaleDateString('pl-PL');
+                    dueText += ' ' + formattedDate;
+                }
+                if (time) {
+                    dueText += ' ' + time;
+                }
+                dueSpan.textContent = dueText;
+                meta.appendChild(dueSpan);
+            }
+
+            const assignedSpan = document.createElement('span');
+            assignedSpan.textContent = 'Przypisane: Ty';
+            meta.appendChild(assignedSpan);
+
+            details.appendChild(meta);
+
+            taskItem.appendChild(checkbox);
+            taskItem.appendChild(details);
+
+            tasksTab.appendChild(taskItem);
+
+            closeAddTaskModal();
         }
 
         function composeMessage() {

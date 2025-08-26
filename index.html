@@ -665,10 +665,10 @@
             elements.loginForm.style.display = 'none';
             elements.successMessage.classList.add('show');
             
-            // Przekieruj po 2 sekundach
+            // Przekieruj do widoku kontaktów po pomyślnym logowaniu
             setTimeout(() => {
-                alert('Zalogowano pomyślnie! W prawdziwej aplikacji nastąpiłoby przekierowanie.');
-            }, 2000);
+                window.location.href = '/contacts.html';
+            }, 1500);
         }
 
         // ============================================

@@ -2059,10 +2059,17 @@
             const userData = localStorage.getItem('userData');
             if (userData) {
                 const user = JSON.parse(userData);
-                currentUserName = user.name || 'Jan Kowalski';
+                const fullName = user.name || [user.first_name, user.last_name].filter(Boolean).join(' ');
+                currentUserName = fullName || 'Jan Kowalski';
                 document.getElementById('userName').textContent = currentUserName;
                 document.getElementById('userEmail').textContent = user.email || 'jan.kowalski@firma.pl';
-                document.getElementById('userAvatar').textContent = 'JK';
+
+                const initials = currentUserName
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .toUpperCase();
+                document.getElementById('userAvatar').textContent = initials || 'JK';
             } else {
                 currentUserName = 'Jan Kowalski';
             }

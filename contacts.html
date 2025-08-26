@@ -1147,10 +1147,15 @@
                 const userName = document.getElementById('userName');
                 const userEmail = document.getElementById('userEmail');
                 const userAvatar = document.getElementById('userAvatar');
-                
-                if (userName && user.name) {
-                    userName.textContent = user.name;
-                    const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+
+                const fullName = user.name || [user.first_name, user.last_name].filter(Boolean).join(' ');
+                if (userName && fullName) {
+                    userName.textContent = fullName;
+                    const initials = fullName
+                        .split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .toUpperCase();
                     userAvatar.textContent = initials;
                 }
                 if (userEmail && user.email) {

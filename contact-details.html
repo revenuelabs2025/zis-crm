@@ -506,6 +506,34 @@
             color: #9ca3af;
         }
 
+        .note-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pin-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #9ca3af;
+            padding: 0;
+            font-size: 14px;
+        }
+
+        .pin-btn:hover {
+            color: #2c3e50;
+        }
+
+        .pin-btn.pinned {
+            color: #e58414;
+        }
+
+        .note-item.pinned {
+            border-color: #e58414;
+            background: #fff7ed;
+        }
+
         .note-content {
             font-size: 14px;
             color: #6b7280;
@@ -1068,7 +1096,10 @@
                         <div class="note-item">
                             <div class="note-header">
                                 <span class="note-author">Jan Kowalski</span>
-                                <span class="note-date">Dzisiaj, 14:30</span>
+                                <div class="note-meta">
+                                    <span class="note-date">Dzisiaj, 14:30</span>
+                                    <button class="pin-btn" onclick="togglePin(this)" title="Przypnij notatkę">📌</button>
+                                </div>
                             </div>
                             <div class="note-content">
                                 Przeprowadzono rozmowę telefoniczną w sprawie nowej oferty na pokrycia dachowe. Klient zainteresowany blachodachówką modułową w kolorze grafitowym. Umówiono spotkanie na przyszły tydzień w siedzibie klienta. Przygotować próbki materiałów i wstępną wycenę.
@@ -1078,7 +1109,10 @@
                         <div class="note-item">
                             <div class="note-header">
                                 <span class="note-author">Anna Nowak</span>
-                                <span class="note-date">Wczoraj, 10:15</span>
+                                <div class="note-meta">
+                                    <span class="note-date">Wczoraj, 10:15</span>
+                                    <button class="pin-btn" onclick="togglePin(this)" title="Przypnij notatkę">📌</button>
+                                </div>
                             </div>
                             <div class="note-content">
                                 Wysłano wstępną wycenę projektu zgodnie z ustaleniami. Klient prosi o dodatkowe informacje dotyczące gwarancji producenta oraz możliwych terminów realizacji. Zasugerował, że decyzja zapadnie do końca miesiąca.
@@ -1088,7 +1122,10 @@
                         <div class="note-item">
                             <div class="note-header">
                                 <span class="note-author">Piotr Wiśniewski</span>
-                                <span class="note-date">10.01.2024, 15:45</span>
+                                <div class="note-meta">
+                                    <span class="note-date">10.01.2024, 15:45</span>
+                                    <button class="pin-btn" onclick="togglePin(this)" title="Przypnij notatkę">📌</button>
+                                </div>
                             </div>
                             <div class="note-content">
                                 Spotkanie wprowadzające z klientem. Przedstawiono pełną ofertę firmy oraz portfolio realizacji. Klient szczególnie zainteresowany systemami rynnowymi i akcesoriami dachowymi.
@@ -1098,7 +1135,10 @@
                         <div class="note-item">
                             <div class="note-header">
                                 <span class="note-author">Jan Kowalski</span>
-                                <span class="note-date">05.01.2024, 09:20</span>
+                                <div class="note-meta">
+                                    <span class="note-date">05.01.2024, 09:20</span>
+                                    <button class="pin-btn" onclick="togglePin(this)" title="Przypnij notatkę">📌</button>
+                                </div>
                             </div>
                             <div class="note-content">
                                 Pierwszy kontakt z klientem poprzez formularz na stronie internetowej. Zainteresowany kompleksową wymianą pokrycia dachowego w budynku biurowym o powierzchni około 800m². Budynek zlokalizowany w centrum Łodzi.
@@ -1316,6 +1356,34 @@
             document.getElementById('noteLink').value = '';
         }
 
+        function createPinButton() {
+            const btn = document.createElement('button');
+            btn.className = 'pin-btn';
+            btn.textContent = '📌';
+            btn.title = 'Przypnij notatkę';
+            btn.onclick = function() { togglePin(btn); };
+            return btn;
+        }
+
+        function togglePin(button) {
+            const noteItem = button.closest('.note-item');
+            const notesTab = document.getElementById('notes-tab');
+            const isPinned = noteItem.classList.toggle('pinned');
+            button.classList.toggle('pinned', isPinned);
+
+            if (isPinned) {
+                notesTab.insertBefore(noteItem, notesTab.firstChild);
+            } else {
+                const pinnedNotes = notesTab.querySelectorAll('.note-item.pinned');
+                if (pinnedNotes.length > 0) {
+                    const lastPinned = pinnedNotes[pinnedNotes.length - 1];
+                    notesTab.insertBefore(noteItem, lastPinned.nextSibling);
+                } else {
+                    notesTab.appendChild(noteItem);
+                }
+            }
+        }
+
         function saveNote() {
             const title = document.getElementById('noteTitle').value.trim();
             const content = document.getElementById('noteContent').value.trim();
@@ -1336,12 +1404,20 @@
             author.className = 'note-author';
             author.textContent = 'Ty';
 
+            const meta = document.createElement('div');
+            meta.className = 'note-meta';
+
             const date = document.createElement('span');
             date.className = 'note-date';
             date.textContent = new Date().toLocaleString('pl-PL');
 
+            const pinBtn = createPinButton();
+
+            meta.appendChild(date);
+            meta.appendChild(pinBtn);
+
             header.appendChild(author);
-            header.appendChild(date);
+            header.appendChild(meta);
             noteItem.appendChild(header);
 
             if (title) {

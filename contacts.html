@@ -1126,9 +1126,7 @@
             if (confirm('Czy na pewno chcesz się wylogować?')) {
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('userData');
-                console.log('Wylogowano pomyślnie');
-                alert('Wylogowano pomyślnie. W prawdziwej aplikacji nastąpiłoby przekierowanie do strony logowania.');
-                // window.location.href = '/login';
+                window.location.href = '/index.html';
             }
         }
 
@@ -1136,6 +1134,12 @@
         // INICJALIZACJA
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = '/index.html';
+                return;
+            }
+
             // Sprawdź dane użytkownika
             const userData = localStorage.getItem('userData');
             if (userData) {

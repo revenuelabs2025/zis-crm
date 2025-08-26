@@ -544,6 +544,24 @@
             color: #1a1a1a;
             margin-bottom: 8px;
         }
+        .note-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+        .note-action-btn {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .note-action-btn:hover {
+            background: #e5e7eb;
+        }
 
         /* Modal styles */
         .modal {
@@ -1104,6 +1122,10 @@
                             <div class="note-content">
                                 Przeprowadzono rozmowę telefoniczną w sprawie nowej oferty na pokrycia dachowe. Klient zainteresowany blachodachówką modułową w kolorze grafitowym. Umówiono spotkanie na przyszły tydzień w siedzibie klienta. Przygotować próbki materiałów i wstępną wycenę.
                             </div>
+                            <div class="note-actions">
+                                <button class="note-action-btn" onclick="editNote(this)">Edytuj</button>
+                                <button class="note-action-btn" onclick="deleteNote(this)">Usuń</button>
+                            </div>
                         </div>
 
                         <div class="note-item">
@@ -1116,6 +1138,10 @@
                             </div>
                             <div class="note-content">
                                 Wysłano wstępną wycenę projektu zgodnie z ustaleniami. Klient prosi o dodatkowe informacje dotyczące gwarancji producenta oraz możliwych terminów realizacji. Zasugerował, że decyzja zapadnie do końca miesiąca.
+                            </div>
+                            <div class="note-actions">
+                                <button class="note-action-btn" onclick="editNote(this)">Edytuj</button>
+                                <button class="note-action-btn" onclick="deleteNote(this)">Usuń</button>
                             </div>
                         </div>
 
@@ -1130,6 +1156,10 @@
                             <div class="note-content">
                                 Spotkanie wprowadzające z klientem. Przedstawiono pełną ofertę firmy oraz portfolio realizacji. Klient szczególnie zainteresowany systemami rynnowymi i akcesoriami dachowymi.
                             </div>
+                            <div class="note-actions">
+                                <button class="note-action-btn" onclick="editNote(this)">Edytuj</button>
+                                <button class="note-action-btn" onclick="deleteNote(this)">Usuń</button>
+                            </div>
                         </div>
 
                         <div class="note-item">
@@ -1142,6 +1172,10 @@
                             </div>
                             <div class="note-content">
                                 Pierwszy kontakt z klientem poprzez formularz na stronie internetowej. Zainteresowany kompleksową wymianą pokrycia dachowego w budynku biurowym o powierzchni około 800m². Budynek zlokalizowany w centrum Łodzi.
+                            </div>
+                            <div class="note-actions">
+                                <button class="note-action-btn" onclick="editNote(this)">Edytuj</button>
+                                <button class="note-action-btn" onclick="deleteNote(this)">Usuń</button>
                             </div>
                         </div>
                     </div>
@@ -1397,6 +1431,38 @@
             }
         }
 
+        function editNote(button) {
+            const noteItem = button.closest('.note-item');
+            const titleEl = noteItem.querySelector('.note-title');
+            const contentEl = noteItem.querySelector('.note-content');
+            const currentTitle = titleEl ? titleEl.textContent : '';
+            const currentContent = contentEl ? contentEl.textContent : '';
+            const newTitle = prompt('Edytuj tytuł notatki:', currentTitle);
+            if (newTitle === null) return;
+            const newContent = prompt('Edytuj treść notatki:', currentContent);
+            if (newContent === null) return;
+            if (titleEl) {
+                if (newTitle.trim()) {
+                    titleEl.textContent = newTitle.trim();
+                } else {
+                    titleEl.remove();
+                }
+            } else if (newTitle.trim()) {
+                const newTitleEl = document.createElement('div');
+                newTitleEl.className = 'note-title';
+                newTitleEl.textContent = newTitle.trim();
+                contentEl.parentNode.insertBefore(newTitleEl, contentEl);
+            }
+            contentEl.textContent = newContent.trim();
+        }
+
+        function deleteNote(button) {
+            if (confirm('Czy na pewno chcesz usunąć tę notatkę?')) {
+                const noteItem = button.closest('.note-item');
+                noteItem.remove();
+            }
+        }
+
         function saveNote() {
             const title = document.getElementById('noteTitle').value.trim();
             const content = document.getElementById('noteContent').value.trim();
@@ -1454,6 +1520,11 @@
                 noteContent.appendChild(linkEl);
             }
             noteItem.appendChild(noteContent);
+
+            const actions = document.createElement('div');
+            actions.className = 'note-actions';
+            actions.innerHTML = '<button class="note-action-btn" onclick="editNote(this)">Edytuj</button><button class="note-action-btn" onclick="deleteNote(this)">Usuń</button>';
+            noteItem.appendChild(actions);
 
             insertNoteSorted(noteItem);
             closeAddNoteModal();

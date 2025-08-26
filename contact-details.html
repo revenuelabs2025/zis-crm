@@ -1339,6 +1339,55 @@
         </div>
     </div>
 
+    <!-- Modal edycji notatki -->
+    <div class="modal" id="editNoteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edytuj notatkę</h2>
+                <button class="modal-close" onclick="closeEditNoteModal()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="editNoteTitle">Tytuł notatki</label>
+                    <input type="text" id="editNoteTitle" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="editNoteContent">Treść</label>
+                    <textarea id="editNoteContent" class="form-input" rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="closeEditNoteModal()">Anuluj</button>
+                <button class="btn btn-primary" onclick="saveEditedNote()">Zapisz</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal usuwania notatki -->
+    <div class="modal" id="deleteNoteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Usuń notatkę</h2>
+                <button class="modal-close" onclick="closeDeleteNoteModal()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Czy na pewno chcesz usunąć tę notatkę?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="closeDeleteNoteModal()">Anuluj</button>
+                <button class="btn btn-primary" onclick="confirmDeleteNote()">Usuń</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Funkcje nawigacyjne
         function setActiveNav(element) {
@@ -1430,37 +1479,72 @@
                 notesTab.appendChild(noteItem);
             }
         }
+        let noteToEdit = null;
+        let noteToDelete = null;
 
         function editNote(button) {
-            const noteItem = button.closest('.note-item');
-            const titleEl = noteItem.querySelector('.note-title');
-            const contentEl = noteItem.querySelector('.note-content');
-            const currentTitle = titleEl ? titleEl.textContent : '';
-            const currentContent = contentEl ? contentEl.textContent : '';
-            const newTitle = prompt('Edytuj tytuł notatki:', currentTitle);
-            if (newTitle === null) return;
-            const newContent = prompt('Edytuj treść notatki:', currentContent);
-            if (newContent === null) return;
-            if (titleEl) {
-                if (newTitle.trim()) {
-                    titleEl.textContent = newTitle.trim();
-                } else {
-                    titleEl.remove();
-                }
-            } else if (newTitle.trim()) {
-                const newTitleEl = document.createElement('div');
-                newTitleEl.className = 'note-title';
-                newTitleEl.textContent = newTitle.trim();
-                contentEl.parentNode.insertBefore(newTitleEl, contentEl);
+            noteToEdit = button.closest('.note-item');
+            const titleEl = noteToEdit.querySelector('.note-title');
+            const contentEl = noteToEdit.querySelector('.note-content');
+            document.getElementById('editNoteTitle').value = titleEl ? titleEl.textContent : '';
+            document.getElementById('editNoteContent').value = contentEl ? contentEl.textContent : '';
+            document.getElementById('editNoteModal').classList.add('show');
+        }
+
+        function closeEditNoteModal() {
+            const modal = document.getElementById('editNoteModal');
+            if (modal) {
+                modal.classList.remove('show');
             }
-            contentEl.textContent = newContent.trim();
+            noteToEdit = null;
+            document.getElementById('editNoteTitle').value = '';
+            document.getElementById('editNoteContent').value = '';
+        }
+
+        function saveEditedNote() {
+            if (!noteToEdit) return;
+            const title = document.getElementById('editNoteTitle').value.trim();
+            const content = document.getElementById('editNoteContent').value.trim();
+            const titleEl = noteToEdit.querySelector('.note-title');
+            const contentEl = noteToEdit.querySelector('.note-content');
+
+            if (title) {
+                if (titleEl) {
+                    titleEl.textContent = title;
+                } else {
+                    const newTitleEl = document.createElement('div');
+                    newTitleEl.className = 'note-title';
+                    newTitleEl.textContent = title;
+                    noteToEdit.insertBefore(newTitleEl, contentEl);
+                }
+            } else if (titleEl) {
+                titleEl.remove();
+            }
+
+            if (contentEl) {
+                contentEl.textContent = content;
+            }
+            closeEditNoteModal();
         }
 
         function deleteNote(button) {
-            if (confirm('Czy na pewno chcesz usunąć tę notatkę?')) {
-                const noteItem = button.closest('.note-item');
-                noteItem.remove();
+            noteToDelete = button.closest('.note-item');
+            document.getElementById('deleteNoteModal').classList.add('show');
+        }
+
+        function closeDeleteNoteModal() {
+            const modal = document.getElementById('deleteNoteModal');
+            if (modal) {
+                modal.classList.remove('show');
             }
+            noteToDelete = null;
+        }
+
+        function confirmDeleteNote() {
+            if (noteToDelete) {
+                noteToDelete.remove();
+            }
+            closeDeleteNoteModal();
         }
 
         function saveNote() {

@@ -2059,11 +2059,13 @@
             const userData = localStorage.getItem('userData');
             if (userData) {
                 const user = JSON.parse(userData);
-                currentUserName = user.name || 'Jan Kowalski';
+                const fullName = user.name || [user.first_name, user.last_name].filter(Boolean).join(' ');
+                currentUserName = fullName || 'Jan Kowalski';
                 document.getElementById('userName').textContent = currentUserName;
                 document.getElementById('userEmail').textContent = user.email || 'jan.kowalski@firma.pl';
 
                 const initials = (user.name || '')
+               
                     .split(' ')
                     .map(n => n[0])
                     .join('')

@@ -641,7 +641,11 @@
                 });
 
                 if (error) {
-                    return { success: false, error: error.message };
+                    const translatedErrors = {
+                        'Invalid login credentials': 'Nieprawidłowy email lub hasło'
+                    };
+                    const translatedMessage = translatedErrors[error.message] || error.message;
+                    return { success: false, error: translatedMessage };
                 }
 
                 return { success: true, data };

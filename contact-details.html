@@ -884,6 +884,41 @@
             overflow: hidden;
         }
 
+        /* Message details modal */
+        .message-modal-content {
+            max-width: 800px;
+        }
+
+        .message-thread-item {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 16px 0;
+        }
+
+        .message-thread-item:last-child {
+            border-bottom: none;
+        }
+
+        .message-thread-header {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .message-thread-header span {
+            display: block;
+        }
+
+        .message-thread-date {
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .message-thread-body {
+            font-size: 14px;
+            color: #2c3e50;
+            white-space: pre-line;
+        }
+
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -1344,6 +1379,21 @@
         </div>
     </main>
 
+    <!-- Modal szczegółów wiadomości -->
+    <div class="modal" id="messageModal">
+        <div class="modal-content message-modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="messageModalSubject"></h2>
+                <button class="modal-close" onclick="closeMessageModal()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="messageModalThread"></div>
+        </div>
+    </div>
+
     <!-- Modal dodawania zadania -->
     <div class="modal" id="addTaskModal">
         <div class="modal-content">
@@ -1790,9 +1840,71 @@
             alert('Otwieranie formularza nowej wiadomości email');
         }
 
+        const messagesData = {
+            1: {
+                subject: 'RE: Oferta na pokrycie dachowe - TechBud',
+                thread: [
+                    {
+                        from: 'ZIS Zawadzki <oferty@zis.pl>',
+                        to: 'Andrzej Nowak <andrzej@techbud.pl>',
+                        date: 'Dzisiaj, 11:45',
+                        body: 'Szanowny Panie Andrzeju, dziękujemy za zainteresowanie naszą ofertą. W załączeniu przesyłamy szczegółową specyfikację techniczną blachodachówki modułowej oraz kompletną wycenę zgodnie z Państwa zapytaniem.\nPozdrawiamy,\nZespół ZIS Zawadzki'
+                    },
+                    {
+                        from: 'Andrzej Nowak <andrzej@techbud.pl>',
+                        to: 'ZIS Zawadzki <oferty@zis.pl>',
+                        date: 'Dzisiaj, 10:15',
+                        body: 'Dzień dobry,\nProszę o przesłanie oferty na pokrycie dachowe zgodnie z rozmową telefoniczną.\nPozdrawiam,\nAndrzej Nowak'
+                    }
+                ]
+            },
+            2: {
+                subject: 'Prośba o ofertę - wymiana pokrycia dachowego',
+                thread: [
+                    {
+                        from: 'Andrzej Nowak <andrzej@techbud.pl>',
+                        to: 'ZIS Zawadzki <oferty@zis.pl>',
+                        date: 'Wczoraj, 15:20',
+                        body: 'Dzień dobry,\nZwracam się z prośbą o przygotowanie oferty na wymianę pokrycia dachowego w naszym budynku biurowym. Obecne pokrycie ma około 15 lat i wymaga pilnej wymiany...\nPozdrawiam,\nAndrzej Nowak'
+                    }
+                ]
+            },
+            3: {
+                subject: 'Potwierdzenie spotkania - 10.01.2024',
+                thread: [
+                    {
+                        from: 'ZIS Zawadzki <oferty@zis.pl>',
+                        to: 'Andrzej Nowak <andrzej@techbud.pl>',
+                        date: '10.01.2024, 09:30',
+                        body: 'Szanowny Panie Andrzeju,\nPotwierdzam nasze dzisiejsze spotkanie o godzinie 14:00 w Państwa siedzibie. Na spotkaniu przedstawię pełną ofertę naszej firmy...\nPozdrawiam,\nJan Kowalski'
+                    }
+                ]
+            }
+        };
+
         function openMessage(id) {
-            console.log('Otwieranie wiadomości:', id);
-            alert('Otwieranie szczegółów wiadomości');
+            const message = messagesData[id];
+            if (!message) return;
+
+            document.getElementById('messageModalSubject').textContent = message.subject;
+
+            const container = document.getElementById('messageModalThread');
+            container.innerHTML = message.thread.map(msg => `
+                <div class="message-thread-item">
+                    <div class="message-thread-header">
+                        <span><strong>Od:</strong> ${msg.from}</span>
+                        <span><strong>Do:</strong> ${msg.to}</span>
+                        <span class="message-thread-date">${msg.date}</span>
+                    </div>
+                    <div class="message-thread-body">${msg.body}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('messageModal').classList.add('show');
+        }
+
+        function closeMessageModal() {
+            document.getElementById('messageModal').classList.remove('show');
         }
 
         function handleLogout() {

@@ -1374,13 +1374,26 @@
             if (isPinned) {
                 notesTab.insertBefore(noteItem, notesTab.firstChild);
             } else {
-                const pinnedNotes = notesTab.querySelectorAll('.note-item.pinned');
-                if (pinnedNotes.length > 0) {
-                    const lastPinned = pinnedNotes[pinnedNotes.length - 1];
-                    notesTab.insertBefore(noteItem, lastPinned.nextSibling);
-                } else {
-                    notesTab.appendChild(noteItem);
+                insertNoteSorted(noteItem);
+            }
+        }
+
+        function insertNoteSorted(noteItem) {
+            const notesTab = document.getElementById('notes-tab');
+            const unpinnedNotes = Array.from(notesTab.querySelectorAll('.note-item:not(.pinned)'));
+            const timestamp = Number(noteItem.dataset.created);
+            let insertBefore = null;
+            for (const note of unpinnedNotes) {
+                if (note === noteItem) continue;
+                if (Number(note.dataset.created) < timestamp) {
+                    insertBefore = note;
+                    break;
                 }
+            }
+            if (insertBefore) {
+                notesTab.insertBefore(noteItem, insertBefore);
+            } else {
+                notesTab.appendChild(noteItem);
             }
         }
 
@@ -1396,6 +1409,7 @@
             const notesTab = document.getElementById('notes-tab');
             const noteItem = document.createElement('div');
             noteItem.className = 'note-item';
+            noteItem.dataset.created = Date.now();
 
             const header = document.createElement('div');
             header.className = 'note-header';
@@ -1441,7 +1455,7 @@
             }
             noteItem.appendChild(noteContent);
 
-            notesTab.appendChild(noteItem);
+            insertNoteSorted(noteItem);
             closeAddNoteModal();
         }
 
@@ -1482,6 +1496,12 @@
                 document.getElementById('userEmail').textContent = user.email || 'jan.kowalski@firma.pl';
                 document.getElementById('userAvatar').textContent = 'JK';
             }
+
+            const existingNotes = document.querySelectorAll('#notes-tab .note-item');
+            let baseTime = Date.now();
+            existingNotes.forEach((note, index) => {
+                note.dataset.created = baseTime - index;
+            });
         });
     </script>
 </body>

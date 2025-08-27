@@ -669,6 +669,7 @@
                         .from('profiles')
                         .select('full_name')
                         .eq('id', user.id)
+                        .eq('login', user.email)
                         .single();
 
                     const userData = { ...user };

@@ -2079,6 +2079,7 @@
                 .from('profiles')
                 .select('full_name')
                 .eq('id', userId)
+                .eq('login', login)
                 .single();
 
             const fullName = profile?.full_name || login;

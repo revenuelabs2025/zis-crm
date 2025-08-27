@@ -68,7 +68,7 @@
         .user-section { padding: 16px; border-top: 1px solid #e5e7eb; background: #fafbfc; }
         .user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 
-        /* Avatar – zostawiam styl, ale element usuwam JS-em (pkt 1) */
+        /* Avatar – element usuwany JS-em */
         .user-avatar {
             width: 40px; height: 40px; border-radius: 50%;
             background: linear-gradient(135deg, #e58414 0%, #c46f0f 100%);
@@ -266,7 +266,7 @@
             </a>
             <a href="#" class="nav-item" onclick="setActiveNav(this)">
                 <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756.426-1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c-.94 1.543-.826 3.31-2.37 2.37.996.608 2.296.07 2.572-1.065z"></path>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
                 <span>Narzędzia</span>
@@ -304,7 +304,7 @@
                     <input type="text" class="search-input" placeholder="Szukaj kontaktów..." id="searchInput" onkeyup="filterContacts()">
                 </div>
 
-                <!-- (pkt 3) Selecty będą czyszczone i wypełniane danymi z Supabase -->
+                <!-- Selecty filtrowania listy – wypełniane z Supabase -->
                 <select class="filter-select" id="filterRegion" onchange="filterContacts()">
                     <option value="">Wszystkie województwa</option>
                 </select>
@@ -503,16 +503,61 @@
             console.log('Otwieranie szczegółów kontaktu:', contact);
             alert(`Szczegóły kontaktu: ${contact.name}\n${contact.company}\n${contact.email}`);
         }
-        function openAddContactModal() {
+
+        // ---- MODAL: ładowanie dropdownów z Supabase (NOWE) ----
+        async function loadModalDropdowns() {
+          const regionSel = document.getElementById('contactRegion');
+          const typeSel   = document.getElementById('contactType');
+          const ownerSel  = document.getElementById('contactOwner');
+          const sourceSel = document.getElementById('contactSource');
+
+          const keepFirst = (sel) => {
+            const first = sel.querySelector('option[value=""]') || new Option('—', '');
+            sel.innerHTML = '';
+            sel.appendChild(first);
+          };
+          keepFirst(regionSel); keepFirst(typeSel); keepFirst(ownerSel); keepFirst(sourceSel);
+
+          const [
+            { data: regions },
+            { data: ctypes  },
+            { data: owners  },
+            { data: sources },
+          ] = await Promise.all([
+            supabaseClient.from('regions').select('id,name').order('name'),
+            supabaseClient.from('contact_types').select('id,name').order('name'),
+            supabaseClient.from('profiles').select('id,full_name,email').order('full_name'),
+            supabaseClient.from('sources').select('id,name').order('name'),
+          ]);
+
+          (regions || []).forEach(r =>
+            regionSel.appendChild(new Option(r.name, r.id))
+          );
+          (ctypes || []).forEach(t =>
+            typeSel.appendChild(new Option(t.name, t.id))
+          );
+          (owners || []).forEach(o => {
+            const label = o.full_name || o.email || o.id;
+            ownerSel.appendChild(new Option(label, o.id));
+          });
+          (sources || []).forEach(s =>
+            sourceSel.appendChild(new Option(s.name, s.id))
+          );
+        }
+
+        // Otwieranie modala: teraz ładuje listy z Supabase
+        async function openAddContactModal() {
             const modal = document.getElementById('addContactModal');
-            const form = document.getElementById('addContactForm');
+            const form  = document.getElementById('addContactForm');
             if (form) form.reset();
+            await loadModalDropdowns(); // <— nowość
             if (modal) modal.classList.add('show');
         }
         function closeAddContactModal() {
             const modal = document.getElementById('addContactModal');
             if (modal) modal.classList.remove('show');
         }
+
         function handleLogout() {
             if (confirm('Czy na pewno chcesz się wylogować?')) {
                 localStorage.removeItem('authToken'); localStorage.removeItem('userData');
@@ -521,7 +566,7 @@
         }
 
         // ============================================
-        // (pkt 3) ŁADOWANIE FILTRÓW Z SUPABASE
+        // (nagłówek) ŁADOWANIE FILTRÓW Z SUPABASE
         // ============================================
         async function loadFiltersFromSupabase() {
             const regionSel = document.getElementById('filterRegion');
@@ -536,19 +581,16 @@
 
             keepFirst(regionSel); keepFirst(typeSel); keepFirst(ownerSel);
 
-            // regions: używamy name jako label, value = name.toLowerCase() (pasuje do dummy danych z diakrytykami)
             const { data: regions } = await supabaseClient.from('regions').select('name').order('name');
             (regions || []).forEach(r => {
                 regionSel.appendChild(new Option(r.name, r.name.toLowerCase()));
             });
 
-            // contact_types: label = DB name, value = mapowane (lead/klient/partner/dostawca...)
             const { data: ctypes } = await supabaseClient.from('contact_types').select('name').order('name');
             (ctypes || []).forEach(t => {
                 typeSel.appendChild(new Option(t.name, toTypeValue(t.name)));
             });
 
-            // profiles: label/value = full_name
             const { data: owners } = await supabaseClient.from('profiles').select('full_name').order('full_name');
             (owners || []).filter(o => o.full_name).forEach(o => {
                 ownerSel.appendChild(new Option(o.full_name, o.full_name));
@@ -556,10 +598,10 @@
         }
 
         // ============================================
-        // INICJALIZACJA (pkt 1 i 2)
+        // INICJALIZACJA (avatar off, user info, filtry, render)
         // ============================================
         document.addEventListener('DOMContentLoaded', async function() {
-            // (2) Uwierzytelnienie i dane zalogowanego użytkownika
+            // Dane zalogowanego użytkownika
             let user = null;
             const storedToken = localStorage.getItem('authToken');
 
@@ -581,7 +623,7 @@
                 return;
             }
 
-            // Pobierz profile.full_name (jeśli jest)
+            // profiles.full_name → wyświetlenie w sidebarze
             const { data: profile } = await supabaseClient
                 .from('profiles')
                 .select('full_name')
@@ -596,22 +638,17 @@
             userName.textContent = fullName;
             userEmail.textContent = user.email;
 
-            // (1) Usuń avatar (zgodnie z wymaganiem)
+            // Usuń avatar
             if (userAvatar) userAvatar.remove();
 
-            // (3) Załaduj filtry z tabel Supabase
+            // Filtry na górze z Supabase
             await loadFiltersFromSupabase();
 
             // Renderuj kontakty (dummy)
             renderContacts();
         });
 
-        // ============================================
-        // INFORMACJA DLA DEVELOPERA
-        // ============================================
         console.log('%c📋 CRM Contacts System', 'color: #e58414; font-size: 20px; font-weight: bold;');
-        console.log('%cLista kontaktów załadowana pomyślnie', 'color: #10b981; font-weight: bold;');
-        console.log(`Liczba kontaktów: ${contacts.length}`);
     </script>
 
     <!-- Modal dodawania kontaktu -->
@@ -626,7 +663,7 @@
                 </button>
             </div>
 
-            <form id="addContactForm" onsubmit="handleAddContact(event)">
+            <form id="addContactForm" onsubmit="handleAddContact && handleAddContact(event)">
                 <div class="modal-body">
                     <div class="form-grid">
                         <!-- Imię i nazwisko -->
@@ -649,27 +686,11 @@
                             <input type="text" class="form-input" id="contactAddress" placeholder="np. ul. Główna 123">
                         </div>
 
-                        <!-- Województwo -->
+                        <!-- Województwo (z Supabase: regions) -->
                         <div>
                             <label class="form-label">Województwo <span>*</span></label>
                             <select class="form-select" id="contactRegion" required>
                                 <option value="">Wybierz województwo</option>
-                                <option value="dolnośląskie">Dolnośląskie</option>
-                                <option value="kujawsko-pomorskie">Kujawsko-Pomorskie</option>
-                                <option value="lubelskie">Lubelskie</option>
-                                <option value="lubuskie">Lubuskie</option>
-                                <option value="łódzkie">Łódzkie</option>
-                                <option value="małopolskie">Małopolskie</option>
-                                <option value="mazowieckie">Mazowieckie</option>
-                                <option value="opolskie">Opolskie</option>
-                                <option value="podkarpackie">Podkarpackie</option>
-                                <option value="podlaskie">Podlaskie</option>
-                                <option value="pomorskie">Pomorskie</option>
-                                <option value="śląskie">Śląskie</option>
-                                <option value="świętokrzyskie">Świętokrzyskie</option>
-                                <option value="warmińsko-mazurskie">Warmińsko-Mazurskie</option>
-                                <option value="wielkopolskie">Wielkopolskie</option>
-                                <option value="zachodniopomorskie">Zachodniopomorskie</option>
                             </select>
                             <div class="error-message" id="regionError"></div>
                         </div>
@@ -695,44 +716,29 @@
                             <div class="error-message" id="phoneError"></div>
                         </div>
 
-                        <!-- Właściciel kontaktu -->
+                        <!-- Właściciel kontaktu (z Supabase: profiles) -->
                         <div>
                             <label class="form-label">Właściciel kontaktu <span>*</span></label>
                             <select class="form-select" id="contactOwner" required>
                                 <option value="">Wybierz właściciela</option>
-                                <option value="Jan Kowalski">Jan Kowalski</option>
-                                <option value="Anna Nowak">Anna Nowak</option>
-                                <option value="Piotr Wiśniewski">Piotr Wiśniewski</option>
                             </select>
                             <div class="error-message" id="ownerError"></div>
                         </div>
 
-                        <!-- Typ kontaktu -->
+                        <!-- Typ kontaktu (z Supabase: contact_types) -->
                         <div>
                             <label class="form-label">Typ kontaktu <span>*</span></label>
                             <select class="form-select" id="contactType" required>
                                 <option value="">Wybierz typ</option>
-                                <option value="klient">Klient</option>
-                                <option value="lead">Lead</option>
-                                <option value="partner">Partner</option>
-                                <option value="dostawca">Dostawca</option>
                             </select>
                             <div class="error-message" id="typeError"></div>
                         </div>
 
-                        <!-- Źródło pozyskania -->
+                        <!-- Źródło pozyskania (z Supabase: sources) -->
                         <div class="form-group-full">
                             <label class="form-label">Źródło pozyskania <span>*</span></label>
                             <select class="form-select" id="contactSource" required>
                                 <option value="">Wybierz źródło</option>
-                                <option value="strona-www">Strona internetowa</option>
-                                <option value="telefon">Telefon przychodzący</option>
-                                <option value="email">Email</option>
-                                <option value="targi">Targi</option>
-                                <option value="rekomendacja">Rekomendacja</option>
-                                <option value="cold-calling">Cold calling</option>
-                                <option value="social-media">Social media</option>
-                                <option value="inne">Inne</option>
                             </select>
                             <div class="error-message" id="sourceError"></div>
                         </div>

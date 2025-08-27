@@ -504,7 +504,7 @@
             alert(`Szczegóły kontaktu: ${contact.name}\n${contact.company}\n${contact.email}`);
         }
 
-        // ---- MODAL: ładowanie dropdownów z Supabase (NOWE) ----
+        // ---- MODAL: ładowanie dropdownów z Supabase (UWAGA: właściciel = profiles.full_name) ----
         async function loadModalDropdowns() {
           const regionSel = document.getElementById('contactRegion');
           const typeSel   = document.getElementById('contactType');
@@ -521,12 +521,18 @@
           const [
             { data: regions },
             { data: ctypes  },
-            { data: owners  },
+            // Właściciele: tylko zarejestrowani użytkownicy z profiles, pokazujemy pełne imię i nazwisko
+            { data: owners, error: ownersErr },
             { data: sources },
           ] = await Promise.all([
             supabaseClient.from('regions').select('id,name').order('name'),
             supabaseClient.from('contact_types').select('id,name').order('name'),
-            supabaseClient.from('profiles').select('id,full_name,email').order('full_name'),
+            supabaseClient
+              .from('profiles')
+              .select('id, full_name')
+              .not('full_name', 'is', null)
+              .neq('full_name', '')
+              .order('full_name', { ascending: true }),
             supabaseClient.from('sources').select('id,name').order('name'),
           ]);
 
@@ -536,21 +542,26 @@
           (ctypes || []).forEach(t =>
             typeSel.appendChild(new Option(t.name, t.id))
           );
-          (owners || []).forEach(o => {
-            const label = o.full_name || o.email || o.id;
-            ownerSel.appendChild(new Option(label, o.id));
-          });
+
+          if (ownersErr) {
+            console.error('Nie udało się pobrać listy użytkowników (profiles):', ownersErr);
+          } else {
+            (owners || []).forEach(({ id, full_name }) => {
+              ownerSel.appendChild(new Option(full_name, id)); // label: imię i nazwisko, value: uuid profilu
+            });
+          }
+
           (sources || []).forEach(s =>
             sourceSel.appendChild(new Option(s.name, s.id))
           );
         }
 
-        // Otwieranie modala: teraz ładuje listy z Supabase
+        // Otwieranie modala: ładuje dropdowny z Supabase
         async function openAddContactModal() {
             const modal = document.getElementById('addContactModal');
             const form  = document.getElementById('addContactForm');
             if (form) form.reset();
-            await loadModalDropdowns(); // <— nowość
+            await loadModalDropdowns();
             if (modal) modal.classList.add('show');
         }
         function closeAddContactModal() {
@@ -716,7 +727,7 @@
                             <div class="error-message" id="phoneError"></div>
                         </div>
 
-                        <!-- Właściciel kontaktu (z Supabase: profiles) -->
+                        <!-- Właściciel kontaktu (zarejestrowani użytkownicy: profiles.full_name) -->
                         <div>
                             <label class="form-label">Właściciel kontaktu <span>*</span></label>
                             <select class="form-select" id="contactOwner" required>

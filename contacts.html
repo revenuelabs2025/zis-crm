@@ -1,766 +1,712 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM System - Kontakty</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
-    <style>
-/* Reset i podstawowe style */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f8f9fa;
-            color: #1a1a1a;
-            min-height: 100vh;
-            display: flex;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 260px;
-            background: white;
-            border-right: 1px solid #e5e7eb;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 100;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
-        }
-
-        .sidebar-header {
-            padding: 24px;
-            border-bottom: 1px solid #e5e7eb;
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        }
-
-        .logo-container {
-            background: white;
-            padding: 12px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo-img {
-            width: 100%;
-            max-width: 160px;
-            height: auto;
-        }
-
-        /* Navigation */
-        .nav-menu { flex: 1; padding: 20px 12px; overflow-y: auto; }
-        .nav-item {
-            display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 4px;
-            border-radius: 8px; color: #6b7280; text-decoration: none; transition: all 0.2s; cursor: pointer;
-            font-size: 14px; font-weight: 500;
-        }
-        .nav-item:hover { background: #f3f4f6; color: #2c3e50; }
-        .nav-item.active { background: #fef3e2; color: #e58414; font-weight: 600; }
-        .nav-icon { width: 20px; height: 20px; flex-shrink: 0; }
-
-        /* User section */
-        .user-section { padding: 16px; border-top: 1px solid #e5e7eb; background: #fafbfc; }
-        .user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-
-        /* Avatar – element usuwany JS-em */
-        .user-avatar {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: linear-gradient(135deg, #e58414 0%, #c46f0f 100%);
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: 600; font-size: 14px;
-            box-shadow: 0 2px 8px rgba(229, 132, 20, 0.3);
-        }
-
-        .user-details { flex: 1; }
-        .user-name { font-size: 14px; font-weight: 600; color: #2c3e50; }
-        .user-email { font-size: 12px; color: #9ca3af; }
-
-        .logout-btn {
-            width: 100%; padding: 8px; background: white; border: 1px solid #e5e7eb; border-radius: 8px;
-            color: #6b7280; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .logout-btn:hover { background: #fef2f2; color: #ef4444; border-color: #fecaca; }
-
-        /* Main content */
-        .main-content { flex: 1; margin-left: 260px; display: flex; flex-direction: column; min-height: 100vh; }
-
-        /* Header */
-        .header { background: white; border-bottom: 1px solid #e5e7eb; padding: 24px 32px; }
-        .page-title { font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 24px; }
-
-        /* Filters bar */
-        .filters-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-        .search-box { flex: 1; min-width: 280px; position: relative; }
-        .search-input {
-            width: 100%; padding: 10px 16px 10px 40px; border: 1px solid #e5e7eb; border-radius: 8px;
-            font-size: 14px; transition: all 0.2s; background: #fafbfc;
-        }
-        .search-input:focus { outline: none; border-color: #e58414; background: white; box-shadow: 0 0 0 3px rgba(229, 132, 20, 0.08); }
-        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; }
-
-        .filter-select {
-            padding: 10px 16px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px;
-            background: white; color: #2c3e50; cursor: pointer; transition: all 0.2s; min-width: 160px;
-        }
-        .filter-select:hover { border-color: #d1d5db; }
-        .filter-select:focus { outline: none; border-color: #e58414; box-shadow: 0 0 0 3px rgba(229, 132, 20, 0.08); }
-
-        .add-contact-btn {
-            padding: 10px 20px; background: #e58414; border: none; border-radius: 8px; color: white;
-            font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; white-space: nowrap;
-        }
-        .add-contact-btn:hover { background: #d47812; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(229, 132, 20, 0.2); }
-
-        /* Table container */
-        .table-container {
-            flex: 1; background: white; margin: 24px; border-radius: 12px; border: 1px solid #e5e7eb;
-            overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Table */
-        .contacts-table { width: 100%; border-collapse: collapse; }
-        .contacts-table thead { background: #fafbfc; border-bottom: 2px solid #e5e7eb; }
-        .contacts-table th {
-            padding: 14px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #6b7280;
-            text-transform: uppercase; letter-spacing: 0.05em;
-        }
-        .contacts-table tbody tr { border-bottom: 1px solid #f3f4f6; transition: background 0.2s; cursor: pointer; }
-        .contacts-table tbody tr:hover { background: #fafbfc; }
-        .contacts-table td { padding: 16px; font-size: 14px; color: #2c3e50; }
-
-        .contact-name { font-weight: 600; color: #1a1a1a; font-size: 14px; }
-        .company-name { font-weight: 500; color: #2c3e50; }
-        .address-text { color: #6b7280; font-size: 13px; line-height: 1.4; }
-        .contact-link { color: #3b82f6; text-decoration: none; font-size: 13px; }
-        .contact-link:hover { text-decoration: underline; }
-
-        .owner-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: #f3f4f6; border-radius: 12px; font-size: 13px; font-weight: 500; }
-        .owner-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; }
-
-        .activity-date { color: #9ca3af; font-size: 13px; }
-        .activity-recent { color: #10b981; font-weight: 500; }
-
-        /* Empty state */
-        .empty-state { padding: 80px 40px; text-align: center; }
-        .empty-icon { width: 80px; height: 80px; margin: 0 auto 24px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .empty-title { font-size: 20px; font-weight: 600; color: #2c3e50; margin-bottom: 8px; }
-        .empty-text { color: #9ca3af; font-size: 14px; }
-
-        /* Modal styles */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; animation: fadeIn 0.3s; }
-        .modal.show { display: flex; align-items: center; justify-content: center; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .modal-content {
-            background: white; border-radius: 16px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); animation: slideUp 0.3s;
-        }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .modal-header { padding: 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
-        .modal-title { font-size: 20px; font-weight: 700; color: #1a1a1a; }
-        .modal-close { width: 32px; height: 32px; border: none; background: #f3f4f6; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .modal-close:hover { background: #e5e7eb; }
-
-        .modal-body { padding: 24px; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .form-group-full { grid-column: 1 / -1; }
-        .form-label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 500; color: #374151; }
-        .form-label span { color: #ef4444; }
-        .form-input, .form-select {
-            width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; transition: all 0.2s; background: white;
-        }
-        .form-input:focus, .form-select:focus { outline: none; border-color: #e58414; box-shadow: 0 0 0 3px rgba(229, 132, 20, 0.08); }
-        .form-input.error, .form-select.error { border-color: #ef4444; }
-        .error-message { color: #ef4444; font-size: 12px; margin-top: 4px; display: none; }
-        .error-message.show { display: block; }
-
-        .modal-footer { padding: 20px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px; }
-        .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; }
-        .btn-cancel { background: white; border: 1px solid #e5e7eb; color: #6b7280; }
-        .btn-cancel:hover { background: #f3f4f6; }
-        .btn-primary { background: #e58414; color: white; }
-        .btn-primary:hover { background: #d47812; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(229, 132, 20, 0.2); }
-        .btn-primary:disabled { background: #9ca3af; cursor: not-allowed; transform: none; }
-
-        @media (max-width: 640px) {
-            .form-grid { grid-template-columns: 1fr; }
-            .modal-content { width: 95%; margin: 20px; }
-        }
-        @media (max-width: 1024px) {
-            .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
-            .sidebar.open { transform: translateX(0); }
-            .main-content { margin-left: 0; }
-            .mobile-menu-btn { display: block; }
-        }
-        @media (max-width: 768px) {
-            .header { padding: 16px; }
-            .table-container { margin: 16px; overflow-x: auto; }
-            .filters-bar { flex-direction: column; align-items: stretch; }
-            .search-box { min-width: 100%; }
-            .filter-select { width: 100%; }
-        }
-
-        /* Mobile menu button */
-        .mobile-menu-btn {
-            display: none; position: fixed; top: 20px; left: 20px; padding: 8px;
-            background: white; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; z-index: 101;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Overlay for mobile */
-        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 99; }
-        .sidebar-overlay.show { display: block; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CRM – Kontakty</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+  <style>
+    /* (styl jak wcześniej – skrócony do kluczowych elementów) */
+    *{box-sizing:border-box} body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f8f9fa;color:#111;min-height:100vh;display:flex}
+    .sidebar{width:260px;background:#fff;border-right:1px solid #e5e7eb;position:fixed;inset:0 auto 0 0}
+    .main{margin-left:260px;flex:1;display:flex;flex-direction:column}
+    .header{background:#fff;border-bottom:1px solid #e5e7eb;padding:24px 32px}
+    .filters{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .search{position:relative;flex:1;min-width:260px}
+    .search input{width:100%;padding:10px 12px 10px 36px;border:1px solid #e5e7eb;border-radius:8px}
+    .filter{padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;background:#fff}
+    .btn{padding:10px 16px;border-radius:8px;border:none;background:#e58414;color:#fff;font-weight:600;cursor:pointer}
+    .table-wrap{background:#fff;margin:24px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
+    table{width:100%;border-collapse:collapse}
+    th{background:#fafbfc;color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:12px}
+    td{padding:14px;border-top:1px solid #f3f4f6}
+    .contact-name a{font-weight:700;color:#111;text-decoration:none}
+    .owner-badge{display:inline-flex;gap:6px;align-items:center;background:#f3f4f6;border-radius:12px;padding:4px 10px}
+    .empty{padding:48px;text-align:center;color:#6b7280}
+    /* Modal + panel szczegółów */
+    .modal,.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
+    .modal.show,.overlay.show{display:flex}
+    .modal .content{background:#fff;border-radius:16px;width:90%;max-width:640px;max-height:90vh;overflow:auto;padding:20px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .grid.full{grid-template-columns:1fr}
+    label{font-size:14px;font-weight:600;margin-bottom:6px;display:block}
+    input,select,textarea{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px}
+    .row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+    .btn.secondary{background:#fff;color:#555;border:1px solid #e5e7eb}
+    /* Panel boczny (quick view) */
+    .drawer{position:fixed;top:0;right:-480px;width:480px;height:100vh;background:#fff;border-left:1px solid #e5e7eb;transition:right .25s;z-index:1100;display:flex;flex-direction:column}
+    .drawer.show{right:0}
+    .drawer header{padding:16px 20px;border-bottom:1px solid #e5e7eb}
+    .drawer .body{padding:16px 20px;overflow:auto;flex:1}
+    .section{margin-bottom:20px}
+    .section h3{font-size:16px;margin-bottom:10px}
+    .list{display:grid;gap:10px}
+    .card{border:1px solid #e5e7eb;border-radius:10px;padding:10px;background:#fafbfc}
+    .actions{display:flex;gap:8px;margin-bottom:12px}
+    .muted{color:#6b7280;font-size:12px}
+  </style>
 </head>
 <body>
-    <!-- Mobile menu button -->
-    <button class="mobile-menu-btn" onclick="toggleSidebar()">
-        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-    </button>
-
-    <!-- Sidebar overlay for mobile -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-container">
-                <img src="http://dachplaski24.pl/wp-content/uploads/2025/08/LOGO-ZIS-ZAWADZKI.jpg" alt="ZIS Zawadzki" class="logo-img">
-            </div>
-        </div>
-
-        <nav class="nav-menu">
-            <a href="#" class="nav-item active" onclick="setActiveNav(this)">
-                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                </svg>
-                <span>Kontakty</span>
-            </a>
-            <a href="#" class="nav-item" onclick="setActiveNav(this)">
-                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                </svg>
-                <span>CRM</span>
-            </a>
-            <a href="#" class="nav-item" onclick="setActiveNav(this)">
-                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span>Realizacje</span>
-            </a>
-            <a href="#" class="nav-item" onclick="setActiveNav(this)">
-                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                </svg>
-                <span>Baza wiedzy</span>
-            </a>
-            <a href="#" class="nav-item" onclick="setActiveNav(this)">
-                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756.426-1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c-.94 1.543-.826 3.31-2.37 2.37.996.608 2.296.07 2.572-1.065z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-                <span>Narzędzia</span>
-            </a>
-        </nav>
-
-        <div class="user-section">
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar"></div>
-                <div class="user-details">
-                    <div class="user-name" id="userName"></div>
-                    <div class="user-email" id="userEmail"></div>
-                </div>
-            </div>
-            <button class="logout-btn" onclick="handleLogout()">
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                </svg>
-                <span>Wyloguj się</span>
-            </button>
-        </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Header -->
-        <header class="header">
-            <h1 class="page-title">Kontakty</h1>
-
-            <div class="filters-bar">
-                <div class="search-box">
-                    <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                    <input type="text" class="search-input" placeholder="Szukaj kontaktów..." id="searchInput" onkeyup="filterContacts()">
-                </div>
-
-                <!-- Selecty filtrowania listy – wypełniane z Supabase -->
-                <select class="filter-select" id="filterRegion" onchange="filterContacts()">
-                    <option value="">Wszystkie województwa</option>
-                </select>
-
-                <select class="filter-select" id="filterType" onchange="filterContacts()">
-                    <option value="">Wszystkie typy</option>
-                </select>
-
-                <select class="filter-select" id="filterOwner" onchange="filterContacts()">
-                    <option value="">Wszyscy właściciele</option>
-                </select>
-
-                <button class="add-contact-btn" onclick="openAddContactModal()">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    <span>Dodaj kontakt</span>
-                </button>
-            </div>
-        </header>
-
-        <!-- Table Container -->
-        <div class="table-container">
-            <table class="contacts-table" id="contactsTable">
-                <thead>
-                    <tr>
-                        <th>Kontakt</th>
-                        <th>Firma</th>
-                        <th>Adres</th>
-                        <th>Email</th>
-                        <th>Telefon</th>
-                        <th>Właściciel</th>
-                        <th>Ostatnia aktywność</th>
-                    </tr>
-                </thead>
-                <tbody id="contactsTableBody"></tbody>
-            </table>
-
-            <!-- Empty state -->
-            <div class="empty-state" id="emptyState" style="display: none;">
-                <div class="empty-icon">
-                    <svg width="40" height="40" fill="none" stroke="#9ca3af" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
-                    </svg>
-                </div>
-                <h3 class="empty-title">Brak kontaktów</h3>
-                <p class="empty-text">Nie znaleziono kontaktów spełniających kryteria wyszukiwania.</p>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        const SUPABASE_URL = 'https://atbldtbvrmgoisykmizn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0YmxkdGJ2cm1nb2lzeWttaXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMTk0MDIsImV4cCI6MjA3MTY5NTQwMn0.xyC0Osw4u--L3kdCF76ih1CSLFA16FKyz9I9PNt33zI';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // ============================================
-        // DANE KONTAKTÓW (DUMMY DATA)
-        // ============================================
-        const contacts = [
-            { id: 1, name: "Andrzej Nowakowski", title: "Dyrektor Techniczny", company: "TechBud Sp. z o.o.", address: "ul. Piotrkowska 125, 90-430 Łódź", region: "łódzkie", email: "a.nowakowski@techbud.pl", phone: "+48 601 234 567", owner: "Jan Kowalski", lastActivity: "2024-01-15", type: "klient" },
-            { id: 2, name: "Maria Wiśniewska",  title: "Właściciel", company: "Dach-Expert", address: "ul. Marszałkowska 10, 00-626 Warszawa", region: "mazowieckie", email: "maria@dachexpert.pl", phone: "+48 602 345 678", owner: "Anna Nowak", lastActivity: "2024-01-14", type: "lead" },
-            { id: 3, name: "Tomasz Kowalczyk", title: "Kierownik Zakupów", company: "BudMax S.A.", address: "ul. Powstańców 45, 40-024 Katowice", region: "śląskie", email: "t.kowalczyk@budmax.com", phone: "+48 603 456 789", owner: "Jan Kowalski", lastActivity: "2024-01-13", type: "partner" },
-            { id: 4, name: "Anna Zielińska",   title: "Prezes Zarządu", company: "EkoDach Polska", address: "ul. Grunwaldzka 82, 60-311 Poznań", region: "wielkopolskie", email: "a.zielinska@ekodach.pl", phone: "+48 604 567 890", owner: "Piotr Wiśniewski", lastActivity: "2024-01-12", type: "klient" },
-            { id: 5, name: "Piotr Lewandowski", title: "Specjalista ds. Inwestycji", company: "Invest-Bud", address: "ul. Długa 23, 31-147 Kraków", region: "małopolskie", email: "p.lewandowski@investbud.pl", phone: "+48 605 678 901", owner: "Anna Nowak", lastActivity: "2024-01-11", type: "dostawca" },
-            { id: 6, name: "Katarzyna Dąbrowska", title: "Menadżer Projektu", company: "Nowoczesne Dachy", address: "ul. Piłsudskiego 15, 50-048 Wrocław", region: "dolnośląskie", email: "k.dabrowska@nowoczesnedachy.pl", phone: "+48 606 789 012", owner: "Jan Kowalski", lastActivity: "2024-01-10", type: "klient" },
-            { id: 7, name: "Robert Wójcik",     title: "Architekt", company: "Architektura Plus", address: "ul. Gdańska 100, 80-834 Gdańsk", region: "pomorskie", email: "r.wojcik@architekturaplus.pl", phone: "+48 607 890 123", owner: "Piotr Wiśniewski", lastActivity: "2024-01-09", type: "partner" },
-            { id: 8, name: "Małgorzata Kamińska", title: "Dyrektor Handlowy", company: "HurtDach", address: "ul. Toruńska 25, 85-023 Bydgoszcz", region: "kujawsko-pomorskie", email: "m.kaminska@hurtdach.com", phone: "+48 608 901 234", owner: "Anna Nowak", lastActivity: "2024-01-08", type: "dostawca" },
-            { id: 9, name: "Krzysztof Mazur",   title: "Właściciel", company: "DachMaster", address: "ul. Wojska Polskiego 45, 70-470 Szczecin", region: "zachodniopomorskie", email: "k.mazur@dachmaster.pl", phone: "+48 609 012 345", owner: "Jan Kowalski", lastActivity: "2024-01-07", type: "lead" },
-            { id:10, name: "Ewa Pawlak",        title: "Kierownik Budowy", company: "BudPro Development", address: "ul. Krakowskie Przedmieście 10, 20-002 Lublin", region: "lubelskie", email: "e.pawlak@budpro.pl", phone: "+48 610 123 456", owner: "Piotr Wiśniewski", lastActivity: "2024-01-06", type: "klient" }
-        ];
-        let filteredContacts = [...contacts];
-
-        // ============================================
-        // POMOCNICZE – normalizacja i mapowanie typów
-        // ============================================
-        const norm = (s) => (s ?? '')
-          .toString()
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .trim();
-
-        // Z DB mamy "Potencjalny Klient" → w dummy danych to "lead"
-        const toTypeValue = (name) => {
-          const n = norm(name);
-          if (n.includes('potencjalny')) return 'lead';
-          return n; // klient, partner, dostawca, podwykonawca...
-        };
-
-        // ============================================
-        // RENDEROWANIE TABELI
-        // ============================================
-        function renderContacts() {
-            const tbody = document.getElementById('contactsTableBody');
-            const emptyState = document.getElementById('emptyState');
-            if (filteredContacts.length === 0) {
-                tbody.innerHTML = '';
-                emptyState.style.display = 'block';
-                return;
-            }
-            emptyState.style.display = 'none';
-            tbody.innerHTML = filteredContacts.map(contact => `
-                <tr onclick="openContactDetails(${contact.id})">
-                    <td>
-                        <div class="contact-name-cell">
-                            <div class="contact-info">
-                                <div class="contact-name">${contact.name}</div>
-                                <div class="contact-title">${contact.title}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span class="company-name">${contact.company}</span></td>
-                    <td><span class="address-text">${contact.address}</span></td>
-                    <td><a href="mailto:${contact.email}" class="contact-link" onclick="event.stopPropagation()">${contact.email}</a></td>
-                    <td><a href="tel:${contact.phone}" class="contact-link" onclick="event.stopPropagation()">${contact.phone}</a></td>
-                    <td>
-                        <span class="owner-badge"><span class="owner-dot"></span>${contact.owner}</span>
-                    </td>
-                    <td>
-                        <span class="activity-date ${isRecent(contact.lastActivity) ? 'activity-recent' : ''}">
-                            ${formatDate(contact.lastActivity)}
-                        </span>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // ============================================
-        // NARZĘDZIA CZASU
-        // ============================================
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffTime = Math.abs(now - date);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            if (diffDays === 0) return 'Dzisiaj';
-            if (diffDays === 1) return 'Wczoraj';
-            if (diffDays < 7) return `${diffDays} dni temu`;
-            return date.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' });
-        }
-        function isRecent(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffTime = Math.abs(now - date);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays <= 7;
-        }
-
-        // ============================================
-        // FILTROWANIE
-        // ============================================
-        function filterContacts() {
-            const searchTerm = norm(document.getElementById('searchInput').value);
-            const regionFilter = norm(document.getElementById('filterRegion').value);
-            const typeFilter   = norm(document.getElementById('filterType').value);
-            const ownerFilter  = document.getElementById('filterOwner').value; // dokładny tekst
-
-            filteredContacts = contacts.filter(contact => {
-                const matchesSearch = !searchTerm ||
-                    norm(contact.name).includes(searchTerm) ||
-                    norm(contact.company).includes(searchTerm) ||
-                    norm(contact.email).includes(searchTerm) ||
-                    contact.phone.includes(searchTerm);
-
-                const matchesRegion = !regionFilter || norm(contact.region) === regionFilter;
-
-                const contactTypeVal = toTypeValue(contact.type);
-                const matchesType = !typeFilter || contactTypeVal === typeFilter;
-
-                const matchesOwner = !ownerFilter || contact.owner === ownerFilter;
-
-                return matchesSearch && matchesRegion && matchesType && matchesOwner;
-            });
-            renderContacts();
-        }
-
-        // ============================================
-        // NAWIGACJA
-        // ============================================
-        function setActiveNav(element) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            element.classList.add('active');
-        }
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('open'); overlay.classList.toggle('show');
-        }
-
-        // ============================================
-        // AKCJE
-        // ============================================
-        function openContactDetails(id) {
-            const contact = contacts.find(c => c.id === id);
-            console.log('Otwieranie szczegółów kontaktu:', contact);
-            alert(`Szczegóły kontaktu: ${contact.name}\n${contact.company}\n${contact.email}`);
-        }
-
-        // ---- MODAL: ładowanie dropdownów z Supabase ----
-        async function loadModalDropdowns() {
-          const regionSel = document.getElementById('contactRegion');
-          const typeSel   = document.getElementById('contactType');
-          const ownerSel  = document.getElementById('contactOwner');
-          const sourceSel = document.getElementById('contactSource');
-
-          const keepFirst = (sel) => {
-            const first = sel.querySelector('option[value=""]') || new Option('—', '');
-            sel.innerHTML = '';
-            sel.appendChild(first);
-          };
-          keepFirst(regionSel); keepFirst(typeSel); keepFirst(ownerSel); keepFirst(sourceSel);
-
-          const [
-            { data: regions, error: er1 },
-            { data: ctypes,  error: er2 },
-            { data: owners,  error: ownersErr },
-            { data: sources, error: er4 },
-          ] = await Promise.all([
-            supabaseClient.from('regions').select('id,name').order('name'),
-            supabaseClient.from('contact_types').select('id,name').order('name'),
-            // Właściciele: pobierz wszystkich z profiles, a potem odfiltruj puste nazwy w JS
-            supabaseClient.from('profiles').select('id, full_name').order('full_name', { ascending: true }),
-            supabaseClient.from('sources').select('id,name').order('name'),
-          ]);
-
-          if (er1) console.error(er1);
-          if (er2) console.error(er2);
-          if (er4) console.error(er4);
-
-          (regions || []).forEach(r =>
-            regionSel.appendChild(new Option(r.name, r.id))
-          );
-          (ctypes || []).forEach(t =>
-            typeSel.appendChild(new Option(t.name, t.id))
-          );
-
-          if (ownersErr) {
-            console.error('Nie udało się pobrać listy użytkowników (profiles):', ownersErr);
-          } else {
-            (owners || [])
-              .filter(o => (o.full_name ?? '').trim().length > 0)
-              .forEach(({ id, full_name }) => {
-                ownerSel.appendChild(new Option(full_name, id)); // label: imię i nazwisko, value: uuid profilu
-              });
-          }
-
-          (sources || []).forEach(s =>
-            sourceSel.appendChild(new Option(s.name, s.id))
-          );
-        }
-
-        // Otwieranie modala: ładuje dropdowny z Supabase
-        async function openAddContactModal() {
-            const modal = document.getElementById('addContactModal');
-            const form  = document.getElementById('addContactForm');
-            if (form) form.reset();
-            await loadModalDropdowns();
-            if (modal) modal.classList.add('show');
-        }
-        function closeAddContactModal() {
-            const modal = document.getElementById('addContactModal');
-            if (modal) modal.classList.remove('show');
-        }
-
-        function handleLogout() {
-            if (confirm('Czy na pewno chcesz się wylogować?')) {
-                localStorage.removeItem('authToken'); localStorage.removeItem('userData');
-                window.location.href = 'index.html';
-            }
-        }
-
-        // ============================================
-        // (nagłówek) ŁADOWANIE FILTRÓW Z SUPABASE
-        // ============================================
-        async function loadFiltersFromSupabase() {
-            const regionSel = document.getElementById('filterRegion');
-            const typeSel   = document.getElementById('filterType');
-            const ownerSel  = document.getElementById('filterOwner');
-
-            const keepFirst = (sel) => {
-                const first = sel.querySelector('option[value=""]');
-                sel.innerHTML = '';
-                sel.appendChild(first || new Option('—', ''));
-            };
-
-            keepFirst(regionSel); keepFirst(typeSel); keepFirst(ownerSel);
-
-            const { data: regions } = await supabaseClient.from('regions').select('name').order('name');
-            (regions || []).forEach(r => {
-                regionSel.appendChild(new Option(r.name, r.name.toLowerCase()));
-            });
-
-            const { data: ctypes } = await supabaseClient.from('contact_types').select('name').order('name');
-            (ctypes || []).forEach(t => {
-                typeSel.appendChild(new Option(t.name, toTypeValue(t.name)));
-            });
-
-            const { data: owners } = await supabaseClient.from('profiles').select('full_name').order('full_name');
-            (owners || []).filter(o => o.full_name).forEach(o => {
-                ownerSel.appendChild(new Option(o.full_name, o.full_name));
-            });
-        }
-
-        // ============================================
-        // INICJALIZACJA (avatar off, user info, filtry, render)
-        // ============================================
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Dane zalogowanego użytkownika
-            let user = null;
-
-            try {
-                const { data: sessionData } = await supabaseClient.auth.getSession();
-                user = sessionData?.session?.user ?? null;
-
-                if (!user) {
-                    const { data } = await supabaseClient.auth.getUser();
-                    user = data?.user ?? null;
-                }
-            } catch (e) {
-                console.warn('auth session error', e);
-            }
-
-            if (!user?.email || !user?.id) {
-                window.location.href = 'index.html';
-                return;
-            }
-
-            // profiles.full_name → wyświetlenie w sidebarze
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('full_name')
-                .eq('id', user.id)
-                .single();
-
-            const fullName = profile?.full_name || user.user_metadata?.full_name || user.email;
-            const userName = document.getElementById('userName');
-            const userEmail = document.getElementById('userEmail');
-            const userAvatar = document.getElementById('userAvatar');
-
-            userName.textContent = fullName;
-            userEmail.textContent = user.email;
-
-            // Usuń avatar
-            if (userAvatar) userAvatar.remove();
-
-            // Filtry na górze z Supabase
-            await loadFiltersFromSupabase();
-
-            // Renderuj kontakty (dummy)
-            renderContacts();
-        });
-
-        console.log('%c📋 CRM Contacts System', 'color: #e58414; font-size: 20px; font-weight: bold;');
-    </script>
-
-    <!-- Modal dodawania kontaktu -->
-    <div class="modal" id="addContactModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Dodaj nowy kontakt</h2>
-                <button class="modal-close" onclick="closeAddContactModal()">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <form id="addContactForm" onsubmit="handleAddContact && handleAddContact(event)">
-                <div class="modal-body">
-                    <div class="form-grid">
-                        <!-- Imię i nazwisko -->
-                        <div class="form-group-full">
-                            <label class="form-label">Imię i nazwisko <span>*</span></label>
-                            <input type="text" class="form-input" id="contactName" required>
-                            <div class="error-message" id="nameError"></div>
-                        </div>
-
-                        <!-- Firma -->
-                        <div class="form-group-full">
-                            <label class="form-label">Firma <span>*</span></label>
-                            <input type="text" class="form-input" id="contactCompany" required>
-                            <div class="error-message" id="companyError"></div>
-                        </div>
-
-                        <!-- Adres firmy -->
-                        <div class="form-group-full">
-                            <label class="form-label">Adres firmy</label>
-                            <input type="text" class="form-input" id="contactAddress" placeholder="np. ul. Główna 123">
-                        </div>
-
-                        <!-- Województwo (z Supabase: regions) -->
-                        <div>
-                            <label class="form-label">Województwo <span>*</span></label>
-                            <select class="form-select" id="contactRegion" required>
-                                <option value="">Wybierz województwo</option>
-                            </select>
-                            <div class="error-message" id="regionError"></div>
-                        </div>
-
-                        <!-- Miejscowość -->
-                        <div>
-                            <label class="form-label">Miejscowość <span>*</span></label>
-                            <input type="text" class="form-input" id="contactCity" required>
-                            <div class="error-message" id="cityError"></div>
-                        </div>
-
-                        <!-- Email -->
-                        <div>
-                            <label class="form-label">Email <span>*</span></label>
-                            <input type="email" class="form-input" id="contactEmail" required>
-                            <div class="error-message" id="emailError"></div>
-                        </div>
-
-                        <!-- Telefon -->
-                        <div>
-                            <label class="form-label">Numer telefonu <span>*</span></label>
-                            <input type="tel" class="form-input" id="contactPhone" placeholder="+48 XXX XXX XXX" required>
-                            <div class="error-message" id="phoneError"></div>
-                        </div>
-
-                        <!-- Właściciel kontaktu (zarejestrowani użytkownicy: profiles.full_name) -->
-                        <div>
-                            <label class="form-label">Właściciel kontaktu <span>*</span></label>
-                            <select class="form-select" id="contactOwner" required>
-                                <option value="">Wybierz właściciela</option>
-                            </select>
-                            <div class="error-message" id="ownerError"></div>
-                        </div>
-
-                        <!-- Typ kontaktu (z Supabase: contact_types) -->
-                        <div>
-                            <label class="form-label">Typ kontaktu <span>*</span></label>
-                            <select class="form-select" id="contactType" required>
-                                <option value="">Wybierz typ</option>
-                            </select>
-                            <div class="error-message" id="typeError"></div>
-                        </div>
-
-                        <!-- Źródło pozyskania (z Supabase: sources) -->
-                        <div class="form-group-full">
-                            <label class="form-label">Źródło pozyskania <span>*</span></label>
-                            <select class="form-select" id="contactSource" required>
-                                <option value="">Wybierz źródło</option>
-                            </select>
-                            <div class="error-message" id="sourceError"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel" onclick="closeAddContactModal()">Anuluj</button>
-                    <button type="submit" class="btn btn-primary" id="saveContactBtn">Zapisz kontakt</button>
-                </div>
-            </form>
-        </div>
+  <!-- Sidebar skrócony -->
+  <aside class="sidebar">
+    <div style="padding:20px;border-bottom:1px solid #e5e7eb">
+      <img src="http://dachplaski24.pl/wp-content/uploads/2025/08/LOGO-ZIS-ZAWADZKI.jpg" alt="ZIS" style="max-width:160px;display:block;margin:auto"/>
     </div>
+    <div style="padding:16px;border-top:1px solid #e5e7eb">
+      <div style="display:flex;gap:10px;align-items:center">
+        <div id="userAvatar" style="display:none"></div>
+        <div>
+          <div id="userName" style="font-weight:700"></div>
+          <div id="userEmail" style="font-size:12px;color:#6b7280"></div>
+        </div>
+      </div>
+      <button class="btn secondary" style="width:100%;margin-top:12px" onclick="handleLogout()">Wyloguj</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="header">
+      <h1 style="margin-bottom:16px">Kontakty</h1>
+      <div class="filters">
+        <div class="search">
+          <input id="searchInput" placeholder="Szukaj kontaktów..." oninput="applyFilters()"/>
+          <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="#9ca3af"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <select id="fRegion" class="filter" onchange="applyFilters()"><option value="">Wszystkie województwa</option></select>
+        <select id="fType" class="filter" onchange="applyFilters()"><option value="">Wszystkie typy</option></select>
+        <select id="fOwner" class="filter" onchange="applyFilters()"><option value="">Wszyscy właściciele</option></select>
+        <button class="btn" onclick="openContactModal()">Dodaj kontakt</button>
+      </div>
+    </header>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kontakt</th>
+            <th>Firma</th>
+            <th>Adres</th>
+            <th>Email</th>
+            <th>Telefon</th>
+            <th>Właściciel</th>
+            <th>Ostatnia aktywność</th>
+          </tr>
+        </thead>
+        <tbody id="contactsTbody"></tbody>
+      </table>
+      <div id="emptyState" class="empty" style="display:none">Brak kontaktów</div>
+    </div>
+  </div>
+
+  <!-- Drawer Quick View -->
+  <div class="drawer" id="drawer">
+    <header>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div id="dvName" style="font-weight:800"></div>
+          <div id="dvCompany" class="muted"></div>
+        </div>
+        <button class="btn secondary" onclick="closeDrawer()">Zamknij</button>
+      </div>
+    </header>
+    <div class="body">
+      <div class="section">
+        <div class="actions">
+          <button class="btn" onclick="openNoteModal()">Dodaj notatkę</button>
+          <button class="btn" onclick="openTaskModal()">Dodaj zadanie</button>
+          <button class="btn" onclick="openMessageModal()">Dodaj wiadomość</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Notatki</h3>
+        <div id="notesList" class="list"></div>
+      </div>
+
+      <div class="section">
+        <h3>Zadania</h3>
+        <div id="tasksList" class="list"></div>
+      </div>
+
+      <div class="section">
+        <h3>Wiadomości</h3>
+        <div id="messagesList" class="list"></div>
+      </div>
+    </div>
+  </div>
+  <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+
+  <!-- Modal: Dodaj kontakt -->
+  <div class="modal" id="contactModal">
+    <div class="content">
+      <h2>Dodaj kontakt</h2>
+      <form id="contactForm" onsubmit="handleSaveContact(event)">
+        <div class="grid">
+          <div>
+            <label>Imię i nazwisko *</label>
+            <input id="c_full_name" required/>
+          </div>
+          <div>
+            <label>Stanowisko</label>
+            <input id="c_job_title" />
+          </div>
+
+          <div>
+            <label>Firma *</label>
+            <input id="c_company_name" required/>
+          </div>
+          <div>
+            <label>Właściciel kontaktu *</label>
+            <select id="c_owner_id" required><option value="">Wybierz właściciela</option></select>
+          </div>
+
+          <div class="full">
+            <label>Ulica i numer</label>
+            <input id="c_street_address" />
+          </div>
+
+          <div>
+            <label>Miejscowość</label>
+            <input id="c_city" />
+          </div>
+          <div>
+            <label>Kod pocztowy</label>
+            <input id="c_postal_code" />
+          </div>
+
+          <div>
+            <label>Województwo *</label>
+            <select id="c_region_id" required><option value="">Wybierz województwo</option></select>
+          </div>
+          <div>
+            <label>Typ kontaktu *</label>
+            <select id="c_contact_type_id" required><option value="">Wybierz typ</option></select>
+          </div>
+
+          <div>
+            <label>Źródło pozyskania *</label>
+            <select id="c_source_id" required><option value="">Wybierz źródło</option></select>
+          </div>
+          <div>
+            <label>Email</label>
+            <input id="c_email" type="email"/>
+          </div>
+
+          <div>
+            <label>Telefon</label>
+            <input id="c_phone" />
+          </div>
+        </div>
+        <div class="row">
+          <button type="button" class="btn secondary" onclick="closeContactModal()">Anuluj</button>
+          <button type="submit" class="btn">Zapisz</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Notatka -->
+  <div class="modal" id="noteModal">
+    <div class="content">
+      <h2>Dodaj notatkę</h2>
+      <form id="noteForm" onsubmit="handleSaveNote(event)">
+        <div class="grid full">
+          <div>
+            <label>Tytuł</label>
+            <input id="n_title"/>
+          </div>
+          <div>
+            <label>Treść *</label>
+            <textarea id="n_content" rows="6" required></textarea>
+          </div>
+          <div>
+            <label>Link</label>
+            <input id="n_link" />
+          </div>
+        </div>
+        <div class="row">
+          <button type="button" class="btn secondary" onclick="closeNoteModal()">Anuluj</button>
+          <button type="submit" class="btn">Zapisz</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Zadanie -->
+  <div class="modal" id="taskModal">
+    <div class="content">
+      <h2>Dodaj zadanie</h2>
+      <form id="taskForm" onsubmit="handleSaveTask(event)">
+        <div class="grid">
+          <div class="full">
+            <label>Nazwa zadania *</label>
+            <input id="t_title" required/>
+          </div>
+          <div class="full">
+            <label>Opis</label>
+            <textarea id="t_description" rows="4"></textarea>
+          </div>
+          <div>
+            <label>Termin wykonania</label>
+            <input id="t_due_at" type="datetime-local"/>
+          </div>
+        </div>
+        <div class="row">
+          <button type="button" class="btn secondary" onclick="closeTaskModal()">Anuluj</button>
+          <button type="submit" class="btn">Zapisz</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Wiadomość -->
+  <div class="modal" id="messageModal">
+    <div class="content">
+      <h2>Dodaj wiadomość</h2>
+      <form id="messageForm" onsubmit="handleSaveMessage(event)">
+        <div class="grid">
+          <div class="full">
+            <label>Temat *</label>
+            <input id="m_subject" required/>
+          </div>
+          <div>
+            <label>Rodzaj *</label>
+            <select id="m_type" required>
+              <option value="">Wybierz</option>
+              <option value="email">Email</option>
+              <option value="sms">SMS</option>
+              <option value="call">Rozmowa tel.</option>
+            </select>
+          </div>
+          <div>
+            <label>Podgląd</label>
+            <input id="m_preview"/>
+          </div>
+          <div class="full">
+            <label>Treść pierwszej wiadomości *</label>
+            <textarea id="m_body" rows="6" required></textarea>
+          </div>
+        </div>
+        <div class="row">
+          <button type="button" class="btn secondary" onclick="closeMessageModal()">Anuluj</button>
+          <button type="submit" class="btn">Zapisz</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // --- Supabase init ---
+    const SUPABASE_URL = 'https://atbldtbvrmgoisykmizn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0YmxkdGJ2cm1nb2lzeWttaXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMTk0MDIsImV4cCI6MjA3MTY5NTQwMn0.xyC0Osw4u--L3kdCF76ih1CSLFA16FKyz9I9PNt33zI';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // --- Auth / bieżący użytkownik ---
+    let currentUser = null;
+    let currentProfile = null; // profiles row of current user
+
+    // --- Referencje (cache do mapowania nazw) ---
+    let regions = [];
+    let contactTypes = [];
+    let owners = [];  // profiles
+    let sources = [];
+
+    // Mapy szybkie
+    const rMap = new Map(), ctMap = new Map(), oMap = new Map(), sMap = new Map();
+
+    // --- Dane kontaktów (z bazy) + widok po filtrze ---
+    let contacts = [];
+    let filtered = [];
+
+    // --- Kontekst wybranego kontaktu w panelu ---
+    let activeContact = null;
+
+    // ======= Narzędzia =======
+    const norm = s => (s ?? '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+    const formatDateHuman = iso => {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      const now = new Date();
+      const diff = (now - d) / (1000*60*60*24);
+      if (diff < 1) return 'Dzisiaj';
+      if (diff < 2) return 'Wczoraj';
+      if (diff < 7) return `${Math.floor(diff)} dni temu`;
+      return d.toLocaleDateString('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'});
+    };
+
+    // ======= UI: Modale / Drawer =======
+    const $ = sel => document.querySelector(sel);
+
+    function openContactModal(){ $('#contactForm').reset(); fillContactModalSelects(); $('#contactModal').classList.add('show'); }
+    function closeContactModal(){ $('#contactModal').classList.remove('show'); }
+
+    function openNoteModal(){ if(!activeContact) return; $('#noteForm').reset(); $('#noteModal').classList.add('show'); }
+    function closeNoteModal(){ $('#noteModal').classList.remove('show'); }
+
+    function openTaskModal(){ if(!activeContact) return; $('#taskForm').reset(); $('#taskModal').classList.add('show'); }
+    function closeTaskModal(){ $('#taskModal').classList.remove('show'); }
+
+    function openMessageModal(){ if(!activeContact) return; $('#messageForm').reset(); $('#messageModal').classList.add('show'); }
+    function closeMessageModal(){ $('#messageModal').classList.remove('show'); }
+
+    function openDrawer(contact){
+      activeContact = contact;
+      $('#dvName').textContent = contact.full_name || `${contact.first_name||''} ${contact.last_name||''}`.trim();
+      $('#dvCompany').textContent = contact.company_name || '—';
+      $('#drawer').classList.add('show');
+      $('#overlay').classList.add('show');
+      loadNotes(contact.id);
+      loadTasks(contact.id);
+      loadMessages(contact.id);
+    }
+    function closeDrawer(){
+      activeContact = null;
+      $('#drawer').classList.remove('show');
+      $('#overlay').classList.remove('show');
+    }
+
+    // ======= Ładowanie referencji i filtrów =======
+    async function loadRefs(){
+      const [r, ct, o, s] = await Promise.all([
+        supabaseClient.from('regions').select('id,name').order('name'),
+        supabaseClient.from('contact_types').select('id,name').order('name'),
+        supabaseClient.from('profiles').select('id,full_name').order('full_name'),
+        supabaseClient.from('sources').select('id,name').order('name'),
+      ]);
+      regions = r.data||[]; contactTypes = ct.data||[]; owners = (o.data||[]).filter(x=>x.full_name); sources = s.data||[];
+      rMap.clear(); regions.forEach(x=>rMap.set(x.id,x.name));
+      ctMap.clear(); contactTypes.forEach(x=>ctMap.set(x.id,x.name));
+      oMap.clear(); owners.forEach(x=>oMap.set(x.id,x.full_name));
+      sMap.clear(); sources.forEach(x=>sMap.set(x.id,x.name));
+
+      // filtry
+      const fRegion = $('#fRegion'), fType = $('#fType'), fOwner = $('#fOwner');
+      fRegion.innerHTML = '<option value="">Wszystkie województwa</option>';
+      regions.forEach(r => fRegion.appendChild(new Option(r.name, r.id)));
+      fType.innerHTML = '<option value="">Wszystkie typy</option>';
+      contactTypes.forEach(t => fType.appendChild(new Option(t.name, t.id)));
+      fOwner.innerHTML = '<option value="">Wszyscy właściciele</option>';
+      owners.forEach(o => fOwner.appendChild(new Option(o.full_name, o.id)));
+    }
+
+    function fillContactModalSelects(){
+      // selecty w modalu kontaktu
+      const sel = (id) => document.getElementById(id);
+      const regionSel = sel('c_region_id'), typeSel = sel('c_contact_type_id'), ownerSel = sel('c_owner_id'), sourceSel = sel('c_source_id');
+      regionSel.innerHTML = '<option value="">Wybierz województwo</option>';
+      regions.forEach(r => regionSel.appendChild(new Option(r.name, r.id)));
+      typeSel.innerHTML = '<option value="">Wybierz typ</option>';
+      contactTypes.forEach(t => typeSel.appendChild(new Option(t.name, t.id)));
+      ownerSel.innerHTML = '<option value="">Wybierz właściciela</option>';
+      owners.forEach(o => ownerSel.appendChild(new Option(o.full_name, o.id)));
+      sourceSel.innerHTML = '<option value="">Wybierz źródło</option>';
+      sources.forEach(s => sourceSel.appendChild(new Option(s.name, s.id)));
+    }
+
+    // ======= Kontakty: pobieranie, render, filtry =======
+    async function loadContacts(){
+      const { data, error } = await supabaseClient
+        .from('contacts')
+        .select('id, first_name, last_name, full_name, job_title, company_name, street_address, city, postal_code, region_id, email, phone, owner_id, contact_type_id, source_id, last_activity_at, created_at')
+        .order('created_at', { ascending: false });
+
+      if (error){ console.error(error); return; }
+      contacts = data || [];
+      filtered = [...contacts];
+      renderContacts();
+      applyFilters(); // od razu filtr po pustych selektach
+    }
+
+    function applyFilters(){
+      const q = norm($('#searchInput').value);
+      const fr = $('#fRegion').value;
+      const ft = $('#fType').value;
+      const fo = $('#fOwner').value;
+
+      filtered = contacts.filter(c => {
+        const matchesQ = !q ||
+          norm(c.full_name || `${c.first_name||''} ${c.last_name||''}`).includes(q) ||
+          norm(c.company_name).includes(q) ||
+          norm(c.email).includes(q) ||
+          (c.phone||'').includes(q);
+
+        const matchesR = !fr || c.region_id === fr;
+        const matchesT = !ft || c.contact_type_id === ft;
+        const matchesO = !fo || c.owner_id === fo;
+
+        return matchesQ && matchesR && matchesT && matchesO;
+      });
+      renderContacts();
+    }
+
+    function renderContacts(){
+      const tbody = $('#contactsTbody');
+      const empty = $('#emptyState');
+
+      if (!filtered.length){
+        tbody.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      tbody.innerHTML = filtered.map(c => {
+        const name = c.full_name || `${c.first_name||''} ${c.last_name||''}`.trim();
+        const company = c.company_name || '—';
+        const address = [c.street_address, c.postal_code, c.city].filter(Boolean).join(', ');
+        const email = c.email || '—';
+        const phone = c.phone || '—';
+        const ownerName = oMap.get(c.owner_id) || '—';
+        const lastAct = formatDateHuman(c.last_activity_at);
+
+        const link = `/contact-details?id=${encodeURIComponent(c.id)}`;
+
+        return `
+          <tr onclick="openDrawerById('${c.id}')">
+            <td class="contact-name">
+              <a href="${link}" onclick="event.stopPropagation()">${name}</a>
+              ${c.job_title ? `<div class="muted">${c.job_title}</div>` : ''}
+            </td>
+            <td>${company}</td>
+            <td>${address || '—'}</td>
+            <td>${email !== '—' ? `<a href="mailto:${email}" onclick="event.stopPropagation()">${email}</a>` : '—'}</td>
+            <td>${phone !== '—' ? `<a href="tel:${phone}" onclick="event.stopPropagation()">${phone}</a>` : '—'}</td>
+            <td><span class="owner-badge"><span style="width:8px;height:8px;border-radius:50%;background:#10b981"></span>${ownerName}</span></td>
+            <td>${lastAct}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openDrawerById(id){
+      const c = contacts.find(x=>x.id===id);
+      if (c) openDrawer(c);
+    }
+
+    // ======= Zapis kontaktu =======
+    function splitName(full){
+      const parts = (full||'').trim().split(/\s+/);
+      if (parts.length === 0) return { first_name: '', last_name: '' };
+      if (parts.length === 1) return { first_name: parts[0], last_name: '' };
+      const last_name = parts.pop();
+      return { first_name: parts.join(' '), last_name };
+    }
+
+    async function handleSaveContact(e){
+      e.preventDefault();
+      const full_name = $('#c_full_name').value.trim();
+      const { first_name, last_name } = splitName(full_name);
+
+      const payload = {
+        first_name,
+        last_name,
+        full_name,
+        job_title: $('#c_job_title').value.trim() || null,
+        company_name: $('#c_company_name').value.trim(),
+        street_address: $('#c_street_address').value.trim() || null,
+        city: $('#c_city').value.trim() || null,
+        postal_code: $('#c_postal_code').value.trim() || null,
+        region_id: $('#c_region_id').value,
+        email: $('#c_email').value.trim() || null,
+        phone: $('#c_phone').value.trim() || null,
+        owner_id: $('#c_owner_id').value,
+        contact_type_id: $('#c_contact_type_id').value,
+        source_id: $('#c_source_id').value,
+        // updated_at/created_at ustawi DB; last_activity_at zostawiamy null
+      };
+
+      const { data, error } = await supabaseClient.from('contacts').insert(payload).select('id').single();
+      if (error){ alert('Błąd zapisu kontaktu'); console.error(error); return; }
+
+      closeContactModal();
+      await loadContacts();
+    }
+
+    // ======= Notatki / Zadania / Wiadomości – odczyt =======
+    async function loadNotes(contact_id){
+      const { data, error } = await supabaseClient
+        .from('contact_notes')
+        .select('id,title,content,link,pinned,author_id,created_at,updated_at')
+        .eq('contact_id', contact_id)
+        .order('created_at', { ascending:false });
+      if (error){ console.error(error); return; }
+
+      const el = $('#notesList');
+      el.innerHTML = (data||[]).map(n => `
+        <div class="card">
+          <div style="font-weight:700">${n.title||'Notatka'}</div>
+          <div class="muted" style="margin:4px 0">${new Date(n.created_at).toLocaleString('pl-PL')}</div>
+          <div>${(n.content||'').replace(/\n/g,'<br/>')}</div>
+          ${n.link ? `<div class="muted" style="margin-top:6px"><a href="${n.link}" target="_blank">Link</a></div>`:''}
+        </div>
+      `).join('') || '<div class="muted">Brak notatek</div>';
+    }
+
+    async function loadTasks(contact_id){
+      const { data, error } = await supabaseClient
+        .from('contact_tasks')
+        .select('id,title,description,owner_id,due_at,completed_at,created_at')
+        .eq('contact_id', contact_id)
+        .order('created_at', { ascending:false });
+      if (error){ console.error(error); return; }
+
+      const el = $('#tasksList');
+      el.innerHTML = (data||[]).map(t => {
+        const ownerName = oMap.get(t.owner_id)||'—';
+        const status = t.completed_at ? `Zakończono: ${new Date(t.completed_at).toLocaleString('pl-PL')}` :
+          (t.due_at ? `Termin: ${new Date(t.due_at).toLocaleString('pl-PL')}` : 'Otwarte');
+        return `
+          <div class="card">
+            <div style="font-weight:700">${t.title}</div>
+            <div class="muted" style="margin:4px 0">${status} • Właściciel: ${ownerName}</div>
+            ${t.description ? `<div>${t.description}</div>`:''}
+          </div>
+        `;
+      }).join('') || '<div class="muted">Brak zadań</div>';
+    }
+
+    async function loadMessages(contact_id){
+      const { data, error } = await supabaseClient
+        .from('contact_messages')
+        .select('id,subject,message_type,preview,last_message_at,created_at,updated_at')
+        .eq('contact_id', contact_id)
+        .order('last_message_at', { ascending:false })
+        .order('created_at', { ascending:false });
+      if (error){ console.error(error); return; }
+
+      const el = $('#messagesList');
+      el.innerHTML = (data||[]).map(m => `
+        <div class="card">
+          <div style="font-weight:700">${m.subject||'(bez tematu)'} <span class="muted">[${m.message_type}]</span></div>
+          <div class="muted" style="margin:4px 0">Ostatnia wiadomość: ${formatDateHuman(m.last_message_at||m.created_at)}</div>
+          <div>${m.preview||''}</div>
+        </div>
+      `).join('') || '<div class="muted">Brak wiadomości</div>';
+    }
+
+    async function bumpLastActivity(contact_id){
+      await supabaseClient.from('contacts').update({ last_activity_at: new Date().toISOString() }).eq('id', contact_id);
+    }
+
+    // ======= Notatki / Zadania / Wiadomości – zapis =======
+    async function handleSaveNote(e){
+      e.preventDefault();
+      if (!activeContact || !currentUser) return;
+      const payload = {
+        contact_id: activeContact.id,
+        author_id: currentUser.id,
+        title: $('#n_title').value.trim() || null,
+        content: $('#n_content').value,
+        link: $('#n_link').value.trim() || null,
+        pinned: false
+      };
+      const { error } = await supabaseClient.from('contact_notes').insert(payload);
+      if (error){ alert('Błąd zapisu notatki'); console.error(error); return; }
+      await bumpLastActivity(activeContact.id);
+      closeNoteModal();
+      await loadNotes(activeContact.id);
+      await loadContacts(); // odśwież listę (ostatnia aktywność)
+    }
+
+    async function handleSaveTask(e){
+      e.preventDefault();
+      if (!activeContact || !currentUser) return;
+      const due = $('#t_due_at').value ? new Date($('#t_due_at').value).toISOString() : null;
+      const payload = {
+        contact_id: activeContact.id,
+        owner_id: currentUser.id, // przypisanie do bieżącego użytkownika
+        title: $('#t_title').value,
+        description: $('#t_description').value.trim() || null,
+        due_at: due,
+        completed_at: null
+      };
+      const { error } = await supabaseClient.from('contact_tasks').insert(payload);
+      if (error){ alert('Błąd zapisu zadania'); console.error(error); return; }
+      await bumpLastActivity(activeContact.id);
+      closeTaskModal();
+      await loadTasks(activeContact.id);
+      await loadContacts();
+    }
+
+    async function handleSaveMessage(e){
+      e.preventDefault();
+      if (!activeContact || !currentUser) return;
+
+      const subject = $('#m_subject').value.trim();
+      const message_type = $('#m_type').value;
+      const preview = $('#m_preview').value.trim() || null;
+      const body = $('#m_body').value;
+
+      // 1) Tworzymy wątek/konwersację contact_messages
+      const nowIso = new Date().toISOString();
+      const { data: msg, error: e1 } = await supabaseClient
+        .from('contact_messages')
+        .insert({
+          contact_id: activeContact.id,
+          subject,
+          message_type,
+          preview,
+          last_message_at: nowIso
+        })
+        .select('id')
+        .single();
+      if (e1){ alert('Błąd zapisu wiadomości (nagłówek)'); console.error(e1); return; }
+
+      // 2) Dodajemy pierwszą wiadomość do message_threads
+      const { error: e2 } = await supabaseClient
+        .from('message_threads')
+        .insert({
+          message_id: msg.id,
+          author_id: currentUser.id,
+          body,
+          sent_at: nowIso
+        });
+      if (e2){ alert('Błąd zapisu treści wiadomości'); console.error(e2); return; }
+
+      await bumpLastActivity(activeContact.id);
+      closeMessageModal();
+      await loadMessages(activeContact.id);
+      await loadContacts();
+    }
+
+    // ======= Auth + boot =======
+    async function boot(){
+      // user info
+      try{
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        currentUser = session?.user ?? null;
+        if (!currentUser){
+          const { data } = await supabaseClient.auth.getUser();
+          currentUser = data?.user ?? null;
+        }
+      }catch(e){ console.warn('auth error', e); }
+
+      if (!currentUser?.id){
+        // przekieruj do logowania, jeśli trzeba
+        // window.location.href = 'index.html';
+        console.warn('Brak sesji — część operacji może się nie udać (RLS)');
+      }
+
+      // sidebar dane użytkownika
+      try{
+        const { data } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
+        currentProfile = data || null;
+        document.getElementById('userName').textContent = currentProfile?.full_name || currentUser?.email || '';
+        document.getElementById('userEmail').textContent = currentUser?.email || '';
+        const av = document.getElementById('userAvatar'); if (av) av.remove(); // bez avatara
+      }catch(e){ /* no-op */ }
+
+      await loadRefs();
+      await loadContacts();
+    }
+
+    function handleLogout(){
+      supabaseClient.auth.signOut().finally(()=>location.href='index.html');
+    }
+
+    // start
+    document.addEventListener('DOMContentLoaded', boot);
+  </script>
 </body>
 </html>

@@ -504,7 +504,7 @@
             alert(`Szczegóły kontaktu: ${contact.name}\n${contact.company}\n${contact.email}`);
         }
 
-        // ---- MODAL: ładowanie dropdownów z Supabase (UWAGA: właściciel = profiles.full_name) ----
+        // ---- MODAL: ładowanie dropdownów z Supabase ----
         async function loadModalDropdowns() {
           const regionSel = document.getElementById('contactRegion');
           const typeSel   = document.getElementById('contactType');
@@ -519,22 +519,21 @@
           keepFirst(regionSel); keepFirst(typeSel); keepFirst(ownerSel); keepFirst(sourceSel);
 
           const [
-            { data: regions },
-            { data: ctypes  },
-            // Właściciele: tylko zarejestrowani użytkownicy z profiles, pokazujemy pełne imię i nazwisko
-            { data: owners, error: ownersErr },
-            { data: sources },
+            { data: regions, error: er1 },
+            { data: ctypes,  error: er2 },
+            { data: owners,  error: ownersErr },
+            { data: sources, error: er4 },
           ] = await Promise.all([
             supabaseClient.from('regions').select('id,name').order('name'),
             supabaseClient.from('contact_types').select('id,name').order('name'),
-            supabaseClient
-              .from('profiles')
-              .select('id, full_name')
-              .not('full_name', 'is', null)
-              .neq('full_name', '')
-              .order('full_name', { ascending: true }),
+            // Właściciele: pobierz wszystkich z profiles, a potem odfiltruj puste nazwy w JS
+            supabaseClient.from('profiles').select('id, full_name').order('full_name', { ascending: true }),
             supabaseClient.from('sources').select('id,name').order('name'),
           ]);
+
+          if (er1) console.error(er1);
+          if (er2) console.error(er2);
+          if (er4) console.error(er4);
 
           (regions || []).forEach(r =>
             regionSel.appendChild(new Option(r.name, r.id))
@@ -546,9 +545,11 @@
           if (ownersErr) {
             console.error('Nie udało się pobrać listy użytkowników (profiles):', ownersErr);
           } else {
-            (owners || []).forEach(({ id, full_name }) => {
-              ownerSel.appendChild(new Option(full_name, id)); // label: imię i nazwisko, value: uuid profilu
-            });
+            (owners || [])
+              .filter(o => (o.full_name ?? '').trim().length > 0)
+              .forEach(({ id, full_name }) => {
+                ownerSel.appendChild(new Option(full_name, id)); // label: imię i nazwisko, value: uuid profilu
+              });
           }
 
           (sources || []).forEach(s =>
@@ -614,19 +615,17 @@
         document.addEventListener('DOMContentLoaded', async function() {
             // Dane zalogowanego użytkownika
             let user = null;
-            const storedToken = localStorage.getItem('authToken');
 
             try {
-                if (storedToken) {
-                    const { data, error } = await supabaseClient.auth.getUser(storedToken);
-                    if (!error) user = data?.user;
-                }
+                const { data: sessionData } = await supabaseClient.auth.getSession();
+                user = sessionData?.session?.user ?? null;
+
                 if (!user) {
-                    const { data, error } = await supabaseClient.auth.getUser();
-                    if (!error) user = data?.user;
+                    const { data } = await supabaseClient.auth.getUser();
+                    user = data?.user ?? null;
                 }
             } catch (e) {
-                console.warn('auth.getUser error', e);
+                console.warn('auth session error', e);
             }
 
             if (!user?.email || !user?.id) {

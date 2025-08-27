@@ -668,6 +668,7 @@
                     const { data: profile } = await supabaseClient
                         .from('profiles')
                         .select('full_name')
+                        .eq('id', user.id)
                         .eq('login', user.email)
                         .single();
 

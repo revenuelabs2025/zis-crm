@@ -1147,6 +1147,7 @@
 
             const { data: authData } = await supabaseClient.auth.getUser(token);
             const login = authData?.user?.email;
+            const userId = authData?.user?.id;
 
             if (!login) {
                 window.location.href = 'index.html';
@@ -1156,6 +1157,7 @@
             const { data: profile } = await supabaseClient
                 .from('profiles')
                 .select('full_name')
+                .eq('id', userId)
                 .eq('login', login)
                 .single();
 

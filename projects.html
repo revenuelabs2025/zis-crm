@@ -601,6 +601,10 @@
             .main-content {
                 margin-left: 0;
             }
+
+            .mobile-menu-btn {
+                display: block;
+            }
         }
 
         @media (max-width: 768px) {
@@ -608,9 +612,50 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Mobile menu button */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 8px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 101;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Overlay for mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
+    <!-- Mobile menu button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
+
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <!-- Sidebar - IDENTYCZNA JAK W POPRZEDNICH WIDOKACH -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -655,10 +700,10 @@
 
         <div class="user-section">
             <div class="user-info">
-                <div class="user-avatar" id="userAvatar">JK</div>
+                <div class="user-avatar" id="userAvatar"></div>
                 <div class="user-details">
-                    <div class="user-name" id="userName">Jan Kowalski</div>
-                    <div class="user-email" id="userEmail">jan.kowalski@firma.pl</div>
+                    <div class="user-name" id="userName"></div>
+                    <div class="user-email" id="userEmail"></div>
                 </div>
             </div>
             <button class="logout-btn" onclick="handleLogout()">
@@ -1088,6 +1133,13 @@
             element.classList.add('active');
         }
 
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
         // View toggle
         function setView(view) {
             document.querySelectorAll('.view-btn').forEach(btn => {
@@ -1127,9 +1179,10 @@
             const userData = localStorage.getItem('userData');
             if (userData) {
                 const user = JSON.parse(userData);
-                document.getElementById('userName').textContent = user.name || 'Jan Kowalski';
-                document.getElementById('userEmail').textContent = user.email || 'jan.kowalski@firma.pl';
-                document.getElementById('userAvatar').textContent = 'JK';
+                document.getElementById('userName').textContent = user.name || '';
+                document.getElementById('userEmail').textContent = user.email || '';
+                const initials = user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : '';
+                document.getElementById('userAvatar').textContent = initials;
             }
         });
     </script>

@@ -107,6 +107,7 @@
             margin-bottom: 12px;
         }
 
+        /* Avatar – element usuwany JS-em */
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -1181,8 +1182,8 @@
                 const user = JSON.parse(userData);
                 document.getElementById('userName').textContent = user.name || '';
                 document.getElementById('userEmail').textContent = user.email || '';
-                const initials = user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : '';
-                document.getElementById('userAvatar').textContent = initials;
+                const userAvatar = document.getElementById('userAvatar');
+                if (userAvatar) userAvatar.remove(); // usuwamy avatar (zgodnie z wcześniejszą prośbą)
             }
         });
     </script>

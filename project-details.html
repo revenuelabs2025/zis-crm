@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CRM System - Szczegóły realizacji</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+      background:#f8f9fa; color:#1a1a1a; min-height:100vh; display:flex;
+    }
+
+    /* Sidebar (1:1) */
+    .sidebar { width:260px; background:#fff; border-right:1px solid #e5e7eb;
+      display:flex; flex-direction:column; height:100vh; position:fixed; left:0; top:0; z-index:100;
+      box-shadow:2px 0 5px rgba(0,0,0,.05); }
+    .sidebar-header { padding:24px; border-bottom:1px solid #e5e7eb;
+      background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%); }
+    .logo-container { background:#fff; padding:12px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+    .logo-img { width:100%; max-width:160px; height:auto; }
+    .nav-menu { flex:1; padding:20px 12px; overflow-y:auto; }
+    .nav-item { display:flex; align-items:center; gap:12px; padding:12px 16px; margin-bottom:4px; border-radius:8px;
+      color:#6b7280; text-decoration:none; transition:all .2s; cursor:pointer; font-size:14px; font-weight:500; }
+    .nav-item:hover { background:#f3f4f6; color:#2c3e50; }
+    .nav-item.active { background:#fef3e2; color:#e58414; font-weight:600; }
+    .nav-icon { width:20px; height:20px; flex-shrink:0; }
+    .user-section { padding:16px; border-top:1px solid #e5e7eb; background:#fafbfc; }
+    .user-info { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+    .user-avatar { width:40px; height:40px; border-radius:50%;
+      background:linear-gradient(135deg,#e58414 0%,#c46f0f 100%);
+      display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;
+      box-shadow:0 2px 8px rgba(229,132,20,.3); }
+    .user-details { flex:1; }
+    .user-name { font-size:14px; font-weight:600; color:#2c3e50; }
+    .user-email { font-size:12px; color:#9ca3af; }
+    .logout-btn { width:100%; padding:8px; background:#fff; border:1px solid #e5e7eb; border-radius:8px;
+      color:#6b7280; font-size:13px; font-weight:500; cursor:pointer; transition:all .2s;
+      display:flex; align-items:center; justify-content:center; gap:8px; }
+    .logout-btn:hover { background:#fef2f2; color:#ef4444; border-color:#fecaca; }
+
+    /* Main */
+    .main-content { flex:1; margin-left:260px; display:flex; flex-direction:column; min-height:100vh; }
+    .header { background:#fff; border-bottom:1px solid #e5e7eb; padding:24px 32px; }
+    .header-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+    .page-title { font-size:28px; font-weight:700; color:#1a1a1a; }
+    .header-actions { display:flex; gap:12px; align-items:center; }
+    .back-btn, .edit-btn { padding:10px 16px; background:#fff; border:1px solid #e5e7eb; border-radius:8px; color:#6b7280;
+      font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:8px; }
+    .back-btn:hover, .edit-btn:hover { border-color:#e58414; color:#e58414; }
+    .content { flex:1; padding:24px; }
+
+    .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:20px;
+      box-shadow:0 1px 0 rgba(0,0,0,0.01); }
+    .section { margin-bottom:24px; }
+    .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+    .section-title { font-size:20px; font-weight:600; color:#2c3e50; display:flex; align-items:center; gap:12px; }
+    .info-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+    .info-item { display:flex; flex-direction:column; gap:4px; }
+    .info-label { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#9ca3af; font-weight:600; }
+    .info-value { font-size:14px; font-weight:500; color:#2c3e50; }
+
+    .twocol { display:grid; grid-template-columns:2fr 1fr; gap:20px; }
+    .threecol { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .twocol-even { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; }
+
+    /* Koszty – kompaktowe, zablokowana wysokość */
+    .charts { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; }
+    .chart-card { height:240px; display:flex; flex-direction:column; }
+    .chart-card .section-title { margin-bottom:8px; }
+    .chart-card canvas { width:100% !important; height:180px !important; max-height:180px !important; }
+
+    /* Folder budowy – jedna kolumna */
+    .links-grid { display:grid; grid-template-columns:1fr; gap:20px; }
+    .link-row { display:flex; gap:12px; flex-wrap:wrap; }
+    .link-btn { padding:10px 14px; background:#fff; border:1px solid #e5e7eb; border-radius:8px; color:#2c3e50;
+      text-decoration:none; font-size:14px; font-weight:500; transition:all .2s; }
+    .link-btn:hover { border-color:#e58414; color:#e58414; }
+    .card-sep { height:1px; background:#e5e7eb; border:0; margin:16px 0; }
+
+    .badge { padding:4px 10px; border-radius:9999px; font-size:12px; font-weight:600; background:#e5e7eb; color:#6b7280; }
+    .accent { color:#e58414; }
+
+    /* Mobile */
+    @media (max-width:1024px){
+      .sidebar{ transform:translateX(-100%); transition:transform .3s; }
+      .sidebar.open{ transform:translateX(0); }
+      .main-content{ margin-left:0; }
+      .mobile-menu-btn{ display:block; }
+      .charts, .twocol, .twocol-even{ grid-template-columns:1fr; }
+      .chart-card{ height:220px; }
+      .chart-card canvas{ height:160px !important; max-height:160px !important; }
+    }
+    @media (max-width:768px){
+      .info-grid{ grid-template-columns:1fr; }
+      .threecol{ grid-template-columns:1fr; }
+    }
+
+    .mobile-menu-btn{ display:none; position:fixed; top:20px; left:20px; padding:8px; background:#fff;
+      border:1px solid #e5e7eb; border-radius:6px; cursor:pointer; z-index:101; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+    .sidebar-overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:99; }
+    .sidebar-overlay.show{ display:block; }
+  </style>
+</head>
+<body>
+  <button class="mobile-menu-btn" onclick="toggleSidebar()">
+    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-container">
+        <img src="http://dachplaski24.pl/wp-content/uploads/2025/08/LOGO-ZIS-ZAWADZKI.jpg" alt="ZIS Zawadzki" class="logo-img">
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="/zis-crm/contacts" class="nav-item" onclick="setActiveNav(this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        <span>Kontakty</span>
+      </a>
+      <a href="#" class="nav-item" onclick="setActiveNav(this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2z"></path></svg>
+        <span>CRM</span>
+      </a>
+      <a href="/zis-crm/projects" class="nav-item active" onclick="setActiveNav(this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span>Realizacje</span>
+      </a>
+      <a href="#" class="nav-item" onclick="setActiveNav(this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        <span>Baza wiedzy</span>
+      </a>
+      <a href="#" class="nav-item" onclick="setActiveNav(this)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        <span>Narzędzia</span>
+      </a>
+    </nav>
+
+    <div class="user-section">
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar"></div>
+        <div class="user-details">
+          <div class="user-name" id="userName"></div>
+          <div class="user-email" id="userEmail"></div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        <span>Wyloguj się</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="header">
+      <div class="header-top">
+        <h1 class="page-title">Szczegóły realizacji</h1>
+        <div class="header-actions">
+          <button class="back-btn" onclick="history.back()">← Wróć do listy</button>
+          <button class="edit-btn" onclick="alert('Tryb edycji (do podpięcia)')">Edytuj dane</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Nagłówek inwestycji -->
+      <section class="section">
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">
+              <span id="projectName" class="accent" style="font-size:22px;"></span>
+              <span class="badge" id="projectStatus">Aktywna</span>
+            </div>
+            <div class="info-item" style="text-align:right;">
+              <span class="info-label">Łączna wartość inwestycji</span>
+              <span class="info-value" id="totalValue"></span>
+            </div>
+          </div>
+
+          <div class="twocol">
+            <div class="info-grid">
+              <div class="info-item"><span class="info-label">Data rozpoczęcia</span><span class="info-value" id="startDate"></span></div>
+              <div class="info-item"><span class="info-label">Data zakończenia</span><span class="info-value" id="endDate"></span></div>
+              <div class="info-item"><span class="info-label">Koordynator</span><span class="info-value" id="coordinator"></span></div>
+              <div class="info-item"><span class="info-label">Postęp</span><span class="info-value" id="progressText"></span></div>
+            </div>
+
+            <div class="card" style="background:#fafbfc;">
+              <div class="threecol">
+                <div class="info-item"><span class="info-label">Typ obiektu</span><span class="info-value" id="buildingType"></span></div>
+                <div class="info-item"><span class="info-label">Rodzaj dachu</span><span class="info-value" id="roofType"></span></div>
+                <div class="info-item"><span class="info-label">Rodzaj hydroizolacji</span><span class="info-value" id="waterproofing"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dane kontaktowe -->
+      <section class="section">
+        <div class="twocol-even">
+          <div class="card">
+            <div class="section-title">Dane inwestora</div>
+            <div class="info-grid">
+              <div class="info-item"><span class="info-label">Nazwa firmy</span><span class="info-value" id="clientCompany"></span></div>
+              <div class="info-item"><span class="info-label">Osoba kontaktowa</span><span class="info-value" id="clientContact"></span></div>
+              <div class="info-item"><span class="info-label">Numer telefonu</span><span class="info-value" id="clientPhone"></span></div>
+              <div class="info-item"><span class="info-label">Adres email</span><span class="info-value" id="clientEmail"></span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Obsługa budowy</div>
+            <div class="info-grid">
+              <div class="info-item"><span class="info-label">Kierownik budowy</span><span class="info-value" id="siteManager"></span></div>
+              <div class="info-item"><span class="info-label">Numer telefonu</span><span class="info-value" id="siteManagerPhone"></span></div>
+              <div class="info-item"><span class="info-label">Adres email</span><span class="info-value" id="siteManagerEmail"></span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Koszty -->
+      <section class="section">
+        <div class="section-header"><div class="section-title">Koszty</div></div>
+        <div class="charts">
+          <div class="card chart-card">
+            <div class="section-title">Oferta (budżet)</div>
+            <canvas id="offerChart"></canvas>
+          </div>
+          <div class="card chart-card">
+            <div class="section-title">Stan aktualny (wydane)</div>
+            <canvas id="actualChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Folder budowy + przeniesione skróty -->
+      <section class="section">
+        <div class="links-grid">
+          <div class="card">
+            <div class="section-title">Folder budowy</div>
+            <p class="info-value" style="margin:12px 0 16px;">Główny katalog dokumentów i plików dla tej inwestycji.</p>
+            <div class="link-row">
+              <a id="buildFolderLink" class="link-btn" href="#" target="_blank">Otwórz folder budowy →</a>
+              <a id="photosFolderLink" class="link-btn" href="#" target="_blank">Zdjęcia z budowy</a>
+              <a id="plansFolderLink" class="link-btn" href="#" target="_blank">Rysunki i plany</a>
+            </div>
+            <hr class="card-sep">
+            <div class="link-row">
+              <a id="wzLink" class="link-btn" href="#" target="_blank">WZ (Wydatki zewnętrzne)</a>
+              <a id="invoicesLink" class="link-btn" href="#" target="_blank">Faktury</a>
+              <a id="docsLink" class="link-btn" href="#" target="_blank">Dokumentacja techniczna</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://atbldtbvrmgoisykmizn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0YmxkdGJ2cm1nb2lzeWttaXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMTk0MDIsImV4cCI6MjA3MTY5NTQwMn0.xyC0Osw4u--L3kdCF76ih1CSLFA16FKyz9I9PNt33zI';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentUser = null;
+
+    const projectDetails = {
+      id: new URLSearchParams(location.search).get('id') || '1',
+      name: 'Centrum Handlowe Galaxy - Nowy dach',
+      status: 'Aktywna',
+      startDate: '15.11.2024',
+      endDate: '28.02.2025',
+      totalValue: 850000,
+      coordinator: 'Jan Kowalski',
+      progress: 75,
+      buildingType: 'Centrum handlowe',
+      roofType: 'Dach płaski',
+      waterproofing: 'EPDM 1.5 mm, klejenie warstwowe',
+      client: { company: 'Galaxy Sp. z o.o.', contact: 'Anna Nowak', phone: '+48 600 100 200', email: 'a.nowak@galaxy.pl' },
+      site: { manager: 'Piotr Wiśniewski', phone: '+48 600 300 400', email: 'p.wisniewski@zis.pl' },
+      costs: {
+        offer:  { material: 420000, labor: 320000, equipment: 110000, total: 850000 },
+        actual: { material: 220000, labor: 180000, equipment:  45000, total: 445000 }
+      },
+      links: { buildFolder: '#', photosFolder: '#', plansFolder: '#', wz: '#', invoices: '#', docs: '#' }
+    };
+
+    function setActiveNav(el){ document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); }
+    function toggleSidebar(){ const s=document.getElementById('sidebar'); const o=document.getElementById('sidebarOverlay'); s.classList.toggle('open'); o.classList.toggle('show'); }
+    function handleLogout(){ supabaseClient.auth.signOut().finally(()=>location.href='index.html'); }
+
+    function formatPLN(v){ return v.toLocaleString('pl-PL',{style:'currency',currency:'PLN', maximumFractionDigits:0}); }
+    function fillDetails(d){
+      projectName.textContent = d.name; projectStatus.textContent = d.status; totalValue.textContent = formatPLN(d.totalValue);
+      startDate.textContent = d.startDate; endDate.textContent = d.endDate; coordinator.textContent = d.coordinator; progressText.textContent = `${d.progress}%`;
+      buildingType.textContent = d.buildingType; roofType.textContent = d.roofType; waterproofing.textContent = d.waterproofing;
+      clientCompany.textContent = d.client.company; clientContact.textContent = d.client.contact; clientPhone.textContent = d.client.phone; clientEmail.textContent = d.client.email;
+      siteManager.textContent = d.site.manager; siteManagerPhone.textContent = d.site.phone; siteManagerEmail.textContent = d.site.email;
+      buildFolderLink.href = d.links.buildFolder; photosFolderLink.href = d.links.photosFolder; plansFolderLink.href = d.links.plansFolder;
+      wzLink.href = d.links.wz; invoicesLink.href = d.links.invoices; docsLink.href = d.links.docs;
+    }
+
+    // Plugin: etykiety
+    const EndValueLabels = {
+      id: 'endValueLabels',
+      afterDatasetsDraw(chart){
+        const {ctx, data} = chart;
+        ctx.save();
+        ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+        ctx.fillStyle = '#374151';
+        ctx.textBaseline = 'middle';
+        const meta = chart.getDatasetMeta(0);
+        meta.data.forEach((bar, i) => {
+          const value = data.datasets[0].data[i];
+          if(value > 0){
+            const label = value.toLocaleString('pl-PL') + ' zł';
+            ctx.fillText(label, bar.x + 6, bar.y);
+          }
+        });
+        ctx.restore();
+      }
+    };
+
+    function makeHorizontalBarChart(ctx, data, title){
+      const maxVal = Math.max(...Object.values(data));
+      const suggestedMax = Math.ceil(maxVal * 1.1 / 10000) * 10000;
+
+      return new Chart(ctx, {
+        type:'bar',
+        data:{
+          labels:['Materiał','Robocizna','Sprzęt','Łączna wartość'],
+          datasets:[{
+            label:title,
+            data:[data.material, data.labor, data.equipment, data.total],
+            backgroundColor:['#e6e9ef','#dcdfe6','#cfd4dd','#e58414'],
+            borderRadius:6,
+            barThickness:18,
+            maxBarThickness:18,
+            categoryPercentage:.72,
+            barPercentage:.9
+          }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          indexAxis:'y',
+          animation:false,
+          transitions:{ active:{ animation:{ duration:0 } }, resize:{ duration:0 } },
+          plugins:{
+            legend:{ display:false },
+            tooltip:{ callbacks:{ label: (c)=> `${c.label}: ${formatPLN(c.parsed.x)}` } }
+          },
+          layout:{ padding:{ right:18 } },
+          scales:{
+            y:{ grid:{ display:false }, ticks:{ font:{ size:12 }, color:'#475569' } },
+            x:{ grid:{ color:'#eef0f3' },
+                ticks:{ callback:(v)=>v>=0?formatPLN(v):v, font:{ size:11 }, color:'#6b7280' },
+                suggestedMax }
+          }
+        },
+        plugins:[EndValueLabels]
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const { data:{ session } } = await supabaseClient.auth.getSession();
+        currentUser = session?.user ?? null;
+        if(!currentUser){
+          const { data } = await supabaseClient.auth.getUser();
+          currentUser = data?.user ?? null;
+        }
+      } catch(e){}
+
+      if(currentUser?.id){
+        try {
+          const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', currentUser.id).single();
+          const fullName = profile?.full_name || currentUser?.user_metadata?.full_name || currentUser?.email || '';
+          userName.textContent = fullName;
+          userEmail.textContent = currentUser?.email || '';
+          const userAvatar = document.getElementById('userAvatar'); if(userAvatar) userAvatar.remove();
+        } catch(e){}
+      }
+
+      fillDetails(projectDetails);
+
+      const offerCtx = document.getElementById('offerChart').getContext('2d');
+      const actualCtx = document.getElementById('actualChart').getContext('2d');
+      makeHorizontalBarChart(offerCtx, projectDetails.costs.offer, 'Oferta (budżet)');
+      makeHorizontalBarChart(actualCtx, projectDetails.costs.actual, 'Stan aktualny (wydane)');
+    });
+  </script>
+</body>
+</html>

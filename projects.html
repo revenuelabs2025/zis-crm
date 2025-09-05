@@ -195,34 +195,6 @@
             gap: 12px;
             align-items: center;
         }
-
-        .view-toggle {
-            display: flex;
-            background: #f3f4f6;
-            border-radius: 8px;
-            padding: 2px;
-        }
-
-        .view-btn {
-            padding: 8px 12px;
-            background: transparent;
-            border: none;
-            border-radius: 6px;
-            color: #6b7280;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-        }
-
-        .view-btn.active {
-            background: white;
-            color: #2c3e50;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
         .add-project-btn {
             padding: 10px 20px;
             background: #e58414;
@@ -678,20 +650,6 @@
             <div class="header-top">
                 <h1 class="page-title">Realizacje</h1>
                 <div class="header-actions">
-                    <div class="view-toggle">
-                        <button class="view-btn active" onclick="setView('grid')">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                            </svg>
-                            <span>Kafelki</span>
-                        </button>
-                        <button class="view-btn" onclick="setView('list')">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                            </svg>
-                            <span>Lista</span>
-                        </button>
-                    </div>
                     <button class="add-project-btn" onclick="addNewProject()">
                         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -1056,15 +1014,6 @@
             const overlay = document.getElementById('sidebarOverlay');
             sidebar.classList.toggle('open');
             overlay.classList.toggle('show');
-        }
-
-        // View toggle
-        function setView(view) {
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.closest('.view-btn').classList.add('active');
-            console.log('Zmiana widoku na:', view);
         }
 
         // Add new project

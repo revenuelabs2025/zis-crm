@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRM System - Realizacje</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <style>
         /* Reset i podstawowe style */
         * {
@@ -20,7 +21,7 @@
             display: flex;
         }
 
-        /* Sidebar - IDENTYCZNY JAK W POPRZEDNICH WIDOKACH */
+        /* Sidebar */
         .sidebar {
             width: 260px;
             background: white;
@@ -657,7 +658,7 @@
     <!-- Sidebar overlay for mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <!-- Sidebar - IDENTYCZNA JAK W POPRZEDNICH WIDOKACH -->
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo-container">
@@ -1126,6 +1127,11 @@
     </main>
 
     <script>
+        const SUPABASE_URL = 'https://atbldtbvrmgoisykmizn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0YmxkdGJ2cm1nb2lzeWttaXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMTk0MDIsImV4cCI6MjA3MTY5NTQwMn0.xyC0Osw4u--L3kdCF76ih1CSLFA16FKyz9I9PNt33zI';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let currentUser = null;
+
         // Navigation
         function setActiveNav(element) {
             document.querySelectorAll('.nav-item').forEach(item => {
@@ -1147,8 +1153,6 @@
                 btn.classList.remove('active');
             });
             event.target.closest('.view-btn').classList.add('active');
-            
-            // W prawdziwej aplikacji zmieniłby się widok na listę/kafelki
             console.log('Zmiana widoku na:', view);
         }
 
@@ -1161,30 +1165,40 @@
         // Open project details
         function openProjectDetails(id) {
             console.log('Otwieranie szczegółów projektu:', id);
-            // W prawdziwej aplikacji przekierowanie do widoku szczegółowego
         }
 
         // Logout
         function handleLogout() {
-            if (confirm('Czy na pewno chcesz się wylogować?')) {
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('userData');
-                console.log('Wylogowano pomyślnie');
-                alert('Wylogowano pomyślnie');
-            }
+            supabaseClient.auth.signOut().finally(()=>location.href='index.html');
         }
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set user data
-            const userData = localStorage.getItem('userData');
-            if (userData) {
-                const user = JSON.parse(userData);
-                document.getElementById('userName').textContent = user.name || '';
-                document.getElementById('userEmail').textContent = user.email || '';
-                const userAvatar = document.getElementById('userAvatar');
-                if (userAvatar) userAvatar.remove(); // usuwamy avatar (zgodnie z wcześniejszą prośbą)
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                currentUser = session?.user ?? null;
+                if (!currentUser) {
+                    const { data } = await supabaseClient.auth.getUser();
+                    currentUser = data?.user ?? null;
+                }
+            } catch(e) { console.warn('auth.getSession error', e); }
+
+            if (!currentUser?.id) {
+                // window.location.href = 'index.html';
             }
+
+            try {
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('full_name')
+                    .eq('id', currentUser.id)
+                    .single();
+                const fullName = profile?.full_name || currentUser?.user_metadata?.full_name || currentUser?.email || '';
+                document.getElementById('userName').textContent = fullName;
+                document.getElementById('userEmail').textContent = currentUser?.email || '';
+                const userAvatar = document.getElementById('userAvatar');
+                if (userAvatar) userAvatar.remove();
+            } catch(e) { /* no-op */ }
         });
     </script>
 </body>

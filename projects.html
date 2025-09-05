@@ -244,52 +244,6 @@
             box-shadow: 0 4px 12px rgba(229, 132, 20, 0.2);
         }
 
-        /* KPI Cards */
-        .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-        }
-
-        .kpi-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #e5e7eb;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .kpi-label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #9ca3af;
-            font-weight: 600;
-        }
-
-        .kpi-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: #2c3e50;
-        }
-
-        .kpi-change {
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .kpi-change.positive {
-            color: #10b981;
-        }
-
-        .kpi-change.negative {
-            color: #ef4444;
-        }
-
         /* Projects Content */
         .projects-content {
             flex: 1;
@@ -747,49 +701,6 @@
                 </div>
             </div>
 
-            <!-- KPI Cards -->
-            <div class="kpi-container">
-                <div class="kpi-card">
-                    <span class="kpi-label">Aktywne inwestycje</span>
-                    <span class="kpi-value">8</span>
-                    <span class="kpi-change positive">
-                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-                        </svg>
-                        +2 ten miesiąc
-                    </span>
-                </div>
-                <div class="kpi-card">
-                    <span class="kpi-label">Łączna wartość</span>
-                    <span class="kpi-value">3.2M zł</span>
-                    <span class="kpi-change positive">
-                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-                        </svg>
-                        +15% vs plan
-                    </span>
-                </div>
-                <div class="kpi-card">
-                    <span class="kpi-label">Średni postęp</span>
-                    <span class="kpi-value">62%</span>
-                    <span class="kpi-change">W terminie</span>
-                </div>
-                <div class="kpi-card">
-                    <span class="kpi-label">Projekty z problemami</span>
-                    <span class="kpi-value">2</span>
-                    <span class="kpi-change negative">
-                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                        Wymaga uwagi
-                    </span>
-                </div>
-                <div class="kpi-card">
-                    <span class="kpi-label">Ukończone w tym roku</span>
-                    <span class="kpi-value">14</span>
-                    <span class="kpi-change">Średnio 45 dni</span>
-                </div>
-            </div>
         </header>
 
         <!-- Projects Content -->

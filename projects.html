@@ -1025,11 +1025,21 @@
                     .from('projects')
                     .select('id', { count: 'exact', head: true })
                     .not('completed_at', 'is', null);
-                const [{ count: activeCount }, { count: completedCount }] = await Promise.all([activeQuery, completedQuery]);
-                document.getElementById('activeProjectsCount').textContent = activeCount ?? 0;
-                document.getElementById('completedProjectsCount').textContent = completedCount ?? 0;
+
+                const [activeRes, completedRes] = await Promise.all([activeQuery, completedQuery]);
+
+                if (activeRes.error || completedRes.error) {
+                    throw activeRes.error || completedRes.error;
+                }
+
+                document.getElementById('activeProjectsCount').textContent = activeRes.count ?? 0;
+                document.getElementById('completedProjectsCount').textContent = completedRes.count ?? 0;
             } catch(e) {
                 console.warn('refreshProjectCounts error', e);
+                const activeCount = document.querySelectorAll('.projects-section:nth-of-type(1) .project-card').length;
+                const completedCount = document.querySelectorAll('.projects-section:nth-of-type(2) .project-card').length;
+                document.getElementById('activeProjectsCount').textContent = activeCount;
+                document.getElementById('completedProjectsCount').textContent = completedCount;
             }
         }
 

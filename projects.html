@@ -108,7 +108,6 @@
             margin-bottom: 12px;
         }
 
-        /* Avatar – element usuwany JS-em */
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -279,11 +278,11 @@
         /* Projects Grid */
         .projects-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 20px;
         }
 
-        /* Project Card */
+        /* Project Card - Nowy design zgodny z projektem */
         .project-card {
             background: white;
             border: 1px solid #e5e7eb;
@@ -291,6 +290,7 @@
             overflow: hidden;
             transition: all 0.2s;
             cursor: pointer;
+            position: relative;
         }
 
         .project-card:hover {
@@ -298,6 +298,7 @@
             transform: translateY(-2px);
         }
 
+        /* Status indicator - kolorowy pasek na górze */
         .project-status-bar {
             height: 4px;
             background: #e5e7eb;
@@ -319,16 +320,21 @@
             background: #9ca3af;
         }
 
+        /* Project content */
+        .project-content {
+            padding: 24px;
+        }
+
         .project-header {
-            padding: 20px;
-            border-bottom: 1px solid #f3f4f6;
+            margin-bottom: 20px;
         }
 
         .project-name {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
             color: #1a1a1a;
             margin-bottom: 8px;
+            line-height: 1.3;
         }
 
         .project-meta {
@@ -336,6 +342,7 @@
             gap: 16px;
             font-size: 13px;
             color: #6b7280;
+            margin-bottom: 16px;
         }
 
         .project-meta-item {
@@ -349,14 +356,11 @@
             height: 14px;
         }
 
-        .project-body {
-            padding: 20px;
-        }
-
+        /* Grid głównych informacji - 2x2 */
         .project-info-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 24px;
             margin-bottom: 20px;
         }
 
@@ -376,56 +380,17 @@
 
         .info-value {
             font-size: 14px;
-            font-weight: 500;
-            color: #2c3e50;
-        }
-
-        /* Progress Bar */
-        .progress-section {
-            margin-bottom: 20px;
-        }
-
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .progress-label {
-            font-size: 12px;
-            color: #6b7280;
-            font-weight: 500;
-        }
-
-        .progress-percentage {
-            font-size: 14px;
             font-weight: 600;
             color: #2c3e50;
         }
 
-        .progress-bar {
-            height: 8px;
-            background: #f3f4f6;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #e58414 0%, #d47812 100%);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        /* Cost Breakdown */
+        /* Breakdown kosztów - 3 kolumny na dole */
         .cost-breakdown {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            padding: 16px;
-            background: #fafbfc;
-            border-radius: 8px;
+            gap: 16px;
+            padding: 16px 0;
+            border-top: 1px solid #f3f4f6;
         }
 
         .cost-item {
@@ -438,44 +403,67 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 4px;
+            font-weight: 600;
         }
 
         .cost-value {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
             color: #2c3e50;
+            margin-bottom: 2px;
         }
 
         .cost-percentage {
             font-size: 11px;
-            color: #6b7280;
-        }
-
-        /* Project Footer */
-        .project-footer {
-            padding: 12px 20px;
-            background: #fafbfc;
-            border-top: 1px solid #f3f4f6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .project-dates {
-            font-size: 12px;
             color: #9ca3af;
         }
 
+        /* Total value - wyróżniona wartość całkowita */
+        .total-value {
+            text-align: center;
+            margin: 16px 0;
+            padding: 12px;
+            background: #fafbfc;
+            border-radius: 8px;
+        }
+
+        .total-label {
+            font-size: 11px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .total-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        /* Project footer z przyciskiem */
+        .project-footer {
+            padding: 16px 24px;
+            background: #fafbfc;
+            border-top: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: flex-end;
+        }
+
         .project-action {
-            padding: 6px 12px;
+            padding: 8px 16px;
             background: white;
             border: 1px solid #e5e7eb;
             border-radius: 6px;
             color: #6b7280;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .project-action:hover {
@@ -538,6 +526,16 @@
         @media (max-width: 768px) {
             .projects-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .project-info-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .cost-breakdown {
+                grid-template-columns: 1fr;
+                gap: 12px;
             }
         }
 
@@ -658,7 +656,6 @@
                     </button>
                 </div>
             </div>
-
         </header>
 
         <!-- Projects Content -->
@@ -674,57 +671,55 @@
                 </div>
 
                 <div class="projects-grid">
-                    <!-- Project Card 1 - On Track -->
+                    <!-- Project Card 1 - Zgodny z projektem -->
                     <div class="project-card" onclick="openProjectDetails(1)">
                         <div class="project-status-bar status-on-track"></div>
-                        <div class="project-header">
-                            <h3 class="project-name">Centrum Handlowe Galaxy - Nowy dach</h3>
-                            <div class="project-meta">
-                                <span class="project-meta-item">
-                                    <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                    </svg>
-                                    Jan Kowalski
-                                </span>
-                                <span class="project-meta-item">
-                                    <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                    </svg>
-                                    Warszawa
-                                </span>
+                        <div class="project-content">
+                            <div class="project-header">
+                                <h3 class="project-name">Centrum Handlowe Galaxy - Nowy dach</h3>
+                                <div class="project-meta">
+                                    <span class="project-meta-item">
+                                        <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                        Jan Kowalski
+                                    </span>
+                                    <span class="project-meta-item">
+                                        <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        </svg>
+                                        Warszawa
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="project-body">
+
+                            <!-- Grid 2x2 z podstawowymi informacjami -->
                             <div class="project-info-grid">
                                 <div class="info-item">
-                                    <span class="info-label">Powierzchnia</span>
+                                    <span class="info-label">Powierzchnia dachu</span>
                                     <span class="info-value">4 500 m²</span>
                                 </div>
                                 <div class="info-item">
-                                    <span class="info-label">Wartość kontraktu</span>
-                                    <span class="info-value">850 000 zł</span>
+                                    <span class="info-label">Powierzchnia elewacji</span>
+                                    <span class="info-value">4 000 m²</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="info-label">Start</span>
-                                    <span class="info-value">15.11.2024</span>
+                                    <span class="info-value">01.12.2024</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="info-label">Planowane zakończenie</span>
-                                    <span class="info-value">28.02.2025</span>
+                                    <span class="info-value">15.02.2025</span>
                                 </div>
                             </div>
 
-                            <div class="progress-section">
-                                <div class="progress-header">
-                                    <span class="progress-label">Postęp realizacji</span>
-                                    <span class="progress-percentage">75%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 75%"></div>
-                                </div>
+                            <!-- Całkowita wartość kontraktu -->
+                            <div class="total-value">
+                                <div class="total-label">Łączna wartość kontraktu:</div>
+                                <div class="total-amount">850 000 zł</div>
                             </div>
 
+                            <!-- Breakdown kosztów - 3 kolumny -->
                             <div class="cost-breakdown">
                                 <div class="cost-item">
                                     <div class="cost-label">Materiał</div>
@@ -745,41 +740,45 @@
                         </div>
 
                         <div class="project-footer">
-                            <span class="project-dates">Pozostało 45 dni</span>
-                            <button class="project-action">Szczegóły →</button>
+                            <button class="project-action">
+                                Szczegóły
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
 
                     <!-- Project Card 2 - Warning -->
                     <div class="project-card" onclick="openProjectDetails(2)">
                         <div class="project-status-bar status-warning"></div>
-                        <div class="project-header">
-                            <h3 class="project-name">Hala Produkcyjna MetalTech - Remont</h3>
-                            <div class="project-meta">
-                                <span class="project-meta-item">
-                                    <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                    </svg>
-                                    Anna Nowak
-                                </span>
-                                <span class="project-meta-item">
-                                    <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                    </svg>
-                                    Łódź
-                                </span>
+                        <div class="project-content">
+                            <div class="project-header">
+                                <h3 class="project-name">Hala Produkcyjna MetalTech - Remont</h3>
+                                <div class="project-meta">
+                                    <span class="project-meta-item">
+                                        <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                        Anna Nowak
+                                    </span>
+                                    <span class="project-meta-item">
+                                        <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        </svg>
+                                        Łódź
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="project-body">
+
                             <div class="project-info-grid">
                                 <div class="info-item">
-                                    <span class="info-label">Powierzchnia</span>
+                                    <span class="info-label">Powierzchnia dachu</span>
                                     <span class="info-value">2 800 m²</span>
                                 </div>
                                 <div class="info-item">
-                                    <span class="info-label">Wartość kontraktu</span>
-                                    <span class="info-value">520 000 zł</span>
+                                    <span class="info-label">Powierzchnia elewacji</span>
+                                    <span class="info-value">4 000 m²</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="info-label">Start</span>
@@ -791,14 +790,9 @@
                                 </div>
                             </div>
 
-                            <div class="progress-section">
-                                <div class="progress-header">
-                                    <span class="progress-label">Postęp realizacji</span>
-                                    <span class="progress-percentage">45%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 45%; background: #fbbf24;"></div>
-                                </div>
+                            <div class="total-value">
+                                <div class="total-label">Łączna wartość kontraktu:</div>
+                                <div class="total-amount">520 000 zł</div>
                             </div>
 
                             <div class="cost-breakdown">
@@ -821,41 +815,45 @@
                         </div>
 
                         <div class="project-footer">
-                            <span class="project-dates" style="color: #f59e0b;">⚠️ Opóźnienie 5 dni</span>
-                            <button class="project-action">Szczegóły →</button>
+                            <button class="project-action">
+                                Szczegóły
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
 
                     <!-- Project Card 3 - Delayed -->
                     <div class="project-card" onclick="openProjectDetails(3)">
                         <div class="project-status-bar status-delayed"></div>
-                        <div class="project-header">
-                            <h3 class="project-name">Biurowiec A4 - Wymiana pokrycia</h3>
-                            <div class="project-meta">
-                                <span class="project-meta-item">
-                                    <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                    </svg>
-                                    Piotr Wiśniewski
-                                </span>
-                                <span class="project-meta-item">
-                                    <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                    </svg>
-                                    Kraków
-                                </span>
+                        <div class="project-content">
+                            <div class="project-header">
+                                <h3 class="project-name">Biurowiec A4 - Wymiana pokrycia</h3>
+                                <div class="project-meta">
+                                    <span class="project-meta-item">
+                                        <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                        Piotr Wiśniewski
+                                    </span>
+                                    <span class="project-meta-item">
+                                        <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        </svg>
+                                        Kraków
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="project-body">
+
                             <div class="project-info-grid">
                                 <div class="info-item">
-                                    <span class="info-label">Powierzchnia</span>
+                                    <span class="info-label">Powierzchnia dachu</span>
                                     <span class="info-value">1 200 m²</span>
                                 </div>
                                 <div class="info-item">
-                                    <span class="info-label">Wartość kontraktu</span>
-                                    <span class="info-value">180 000 zł</span>
+                                    <span class="info-label">Powierzchnia elewacji</span>
+                                    <span class="info-value">800 m²</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="info-label">Start</span>
@@ -867,14 +865,9 @@
                                 </div>
                             </div>
 
-                            <div class="progress-section">
-                                <div class="progress-header">
-                                    <span class="progress-label">Postęp realizacji</span>
-                                    <span class="progress-percentage">30%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 30%; background: #ef4444;"></div>
-                                </div>
+                            <div class="total-value">
+                                <div class="total-label">Łączna wartość kontraktu:</div>
+                                <div class="total-amount">180 000 zł</div>
                             </div>
 
                             <div class="cost-breakdown">
@@ -897,8 +890,12 @@
                         </div>
 
                         <div class="project-footer">
-                            <span class="project-dates" style="color: #ef4444;">⚠️ Opóźnienie 15 dni</span>
-                            <button class="project-action">Szczegóły →</button>
+                            <button class="project-action">
+                                Szczegóły
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -918,33 +915,33 @@
                     <!-- Completed Project Card -->
                     <div class="project-card" onclick="openProjectDetails(4)">
                         <div class="project-status-bar status-completed"></div>
-                        <div class="project-header">
-                            <h3 class="project-name">Hotel Polonia - Kompleksowa wymiana</h3>
-                            <div class="project-meta">
-                                <span class="project-meta-item">
-                                    <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                    </svg>
-                                    Anna Nowak
-                                </span>
-                                <span class="project-meta-item">
-                                    <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                    </svg>
-                                    Poznań
-                                </span>
+                        <div class="project-content">
+                            <div class="project-header">
+                                <h3 class="project-name">Hotel Polonia - Kompleksowa wymiana</h3>
+                                <div class="project-meta">
+                                    <span class="project-meta-item">
+                                        <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                        Anna Nowak
+                                    </span>
+                                    <span class="project-meta-item">
+                                        <svg class="meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        </svg>
+                                        Poznań
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="project-body">
+
                             <div class="project-info-grid">
                                 <div class="info-item">
-                                    <span class="info-label">Powierzchnia</span>
+                                    <span class="info-label">Powierzchnia dachu</span>
                                     <span class="info-value">3 200 m²</span>
                                 </div>
                                 <div class="info-item">
-                                    <span class="info-label">Wartość kontraktu</span>
-                                    <span class="info-value">680 000 zł</span>
+                                    <span class="info-label">Powierzchnia elewacji</span>
+                                    <span class="info-value">2 500 m²</span>
                                 </div>
                                 <div class="info-item">
                                     <span class="info-label">Start</span>
@@ -956,14 +953,9 @@
                                 </div>
                             </div>
 
-                            <div class="progress-section">
-                                <div class="progress-header">
-                                    <span class="progress-label">Realizacja</span>
-                                    <span class="progress-percentage">100%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 100%; background: #9ca3af;"></div>
-                                </div>
+                            <div class="total-value">
+                                <div class="total-label">Łączna wartość kontraktu:</div>
+                                <div class="total-amount">680 000 zł</div>
                             </div>
 
                             <div class="cost-breakdown">
@@ -986,8 +978,12 @@
                         </div>
 
                         <div class="project-footer">
-                            <span class="project-dates" style="color: #10b981;">✓ Zakończono w terminie</span>
-                            <button class="project-action">Podsumowanie →</button>
+                            <button class="project-action">
+                                Podsumowanie
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>

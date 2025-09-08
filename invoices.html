@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRM System - Faktury</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <style>
         /* Reset i podstawowe style */
         * {
@@ -664,6 +665,10 @@
             .main-content {
                 margin-left: 0;
             }
+
+            .mobile-menu-btn {
+                display: block;
+            }
         }
 
         @media (max-width: 768px) {
@@ -689,9 +694,34 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .mobile-menu-btn {
+            display: none; position: fixed; top: 20px; left: 20px; padding: 8px;
+            background: white; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer; z-index: 101;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5); z-index: 99;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
+    <!-- Mobile menu button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
+
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <!-- Sidebar - IDENTYCZNA JAK W INNYCH WIDOKACH -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -701,19 +731,19 @@
         </div>
 
         <nav class="nav-menu">
-            <a href="#" class="nav-item" onclick="setActiveNav(this)">
+            <a href="/zis-crm/contacts" class="nav-item" onclick="setActiveNav(this)">
                 <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                 </svg>
                 <span>Kontakty</span>
             </a>
-            <a href="#" class="nav-item" onclick="setActiveNav(this)">
+            <a href="/zis-crm/offers" class="nav-item" onclick="setActiveNav(this)">
                 <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                 </svg>
                 <span>CRM</span>
             </a>
-            <a href="#" class="nav-item active" onclick="setActiveNav(this)">
+            <a href="/zis-crm/projects" class="nav-item active" onclick="setActiveNav(this)">
                 <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
@@ -736,9 +766,10 @@
 
         <div class="user-section">
             <div class="user-info">
+                <div class="user-avatar" id="userAvatar"></div>
                 <div class="user-details">
-                    <div class="user-name" id="userName">Jan Kowalski</div>
-                    <div class="user-email" id="userEmail">jan.kowalski@firma.pl</div>
+                    <div class="user-name" id="userName"></div>
+                    <div class="user-email" id="userEmail"></div>
                 </div>
             </div>
             <button class="logout-btn" onclick="handleLogout()">
@@ -969,6 +1000,11 @@
     </div>
 
     <script>
+        const SUPABASE_URL = 'https://atbldtbvrmgoisykmizn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0YmxkdGJ2cm1nb2lzeWtt
+aXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMTk0MDIsImV4cCI6MjA3MTY5NTQwMn0.xyC0Osw4u--L3kdCF76ih1CSLFA16FKyz9I9PNt33zI';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         // Przykładowe dane firm
         const companies = [
             { name: 'BudMat Sp. z o.o.', details: 'ul. Przemysłowa 15, 02-232 Warszawa' },
@@ -1165,13 +1201,20 @@
             element.classList.add('active');
         }
 
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
         // Logout function
         function handleLogout() {
-            if (confirm('Czy na pewno chcesz się wylogować?')) {
-                console.log('Logging out...');
-                // Tutaj dodasz logikę wylogowania
-            }
+            supabaseClient.auth.signOut().finally(() => location.href='index.html');
         }
+
+        const userAvatar = document.getElementById('userAvatar');
+        if (userAvatar) userAvatar.remove();
     </script>
 </body>
 </html>

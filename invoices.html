@@ -766,7 +766,6 @@
 
         <div class="user-section">
             <div class="user-info">
-                <div class="user-avatar" id="userAvatar"></div>
                 <div class="user-details">
                     <div class="user-name" id="userName"></div>
                     <div class="user-email" id="userEmail"></div>
@@ -1213,8 +1212,6 @@ aXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMTk0MDIsImV4cCI6MjA3MTY5NTQwMn0.xyC0Osw4
             supabaseClient.auth.signOut().finally(() => location.href='index.html');
         }
 
-        const userAvatar = document.getElementById('userAvatar');
-        if (userAvatar) userAvatar.remove();
     </script>
 </body>
 </html>

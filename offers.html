@@ -108,20 +108,6 @@
             margin-bottom: 12px;
         }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #e58414 0%, #c46f0f 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-            box-shadow: 0 2px 8px rgba(229, 132, 20, 0.3);
-        }
-
         .user-details {
             flex: 1;
         }
@@ -567,7 +553,6 @@
 
         <div class="user-section">
             <div class="user-info">
-                <div class="user-avatar" id="userAvatar"></div>
                 <div class="user-details">
                     <div class="user-name" id="userName"></div>
                     <div class="user-email" id="userEmail"></div>
@@ -1156,8 +1141,6 @@ aXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMTk0MDIsImV4cCI6MjA3MTY5NTQwMn0.xyC0Osw4
             supabaseClient.auth.signOut().finally(() => location.href='index.html');
         }
 
-        const userAvatar = document.getElementById('userAvatar');
-        if (userAvatar) userAvatar.remove();
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -1167,7 +1150,6 @@ aXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxMTk0MDIsImV4cCI6MjA3MTY5NTQwMn0.xyC0Osw4
                 const user = JSON.parse(userData);
                 document.getElementById('userName').textContent = user.name || 'Jan Kowalski';
                 document.getElementById('userEmail').textContent = user.email || 'jan.kowalski@firma.pl';
-                document.getElementById('userAvatar').textContent = 'JK';
             }
             
             // Initialize column stats

@@ -706,7 +706,7 @@
             
             // Pobierz dane z formularza
             state.formData.email = elements.emailInput.value.trim();
-            state.formData.password = elements.passwordInput.value;
+            state.formData.password = elements.passwordInput.value.trim();
             
             // Walidacja
             const errors = validateForm();
